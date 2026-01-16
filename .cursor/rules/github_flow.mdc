@@ -6,6 +6,26 @@ alwaysApply: true
 
 # GitHub Flow Best Practices
 
+## ⚠️ CRITICAL: Branch Check Requirement
+
+**BEFORE making ANY changes, you MUST:**
+
+1. **Check current branch**: Run `git branch --show-current` or `git status`
+2. **If on `master` or `main`**: 
+   - **STOP immediately**
+   - Create a feature branch: `git checkout -b feature/description` or `git checkout -b chore/task-name`
+   - **NEVER commit directly to `master` or `main`**
+3. **Verify you're on a feature branch** before making any changes
+4. **All commits must be on feature branches**, never on `master`/`main`
+
+**Branch naming examples:**
+- `feature/user-authentication`
+- `bugfix/login-error`
+- `chore/update-dependencies`
+- `docs/api-documentation`
+
+**This is MANDATORY for all agents and all work.**
+
 ## 1. GitHub Flow Overview
 
 ### Core Principles
