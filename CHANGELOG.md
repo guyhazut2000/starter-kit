@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Version management system with Semantic Versioning
 - npm scripts for version bumping (patch, minor, major)
 - CHANGELOG.md for tracking changes
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-01-01
 
 ### Added
+
 - Initial project setup
 - Next.js 16 with App Router
 - TypeScript configuration

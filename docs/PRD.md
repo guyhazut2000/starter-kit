@@ -13,20 +13,24 @@ This is a modern Next.js starter kit built with TypeScript, following feature-ba
 ## Technology Stack
 
 ### Core Framework
+
 - **Next.js 16+** with App Router
 - **React 19+** for UI components
 - **TypeScript 5+** for type safety
 
 ### Data & State Management
+
 - **Prisma ORM** for database operations
 - **TanStack Query (React Query)** for server state management
 - **Zod** for runtime validation and type inference
 
 ### Styling & UI
+
 - **Tailwind CSS 4+** for utility-first styling
 - **Shadcn UI** for accessible component primitives
 
 ### Development & Quality
+
 - **ESLint** for code linting
 - **Winston** for structured logging
 - **Jest** + **React Testing Library** for testing
@@ -120,22 +124,26 @@ This is a modern Next.js starter kit built with TypeScript, following feature-ba
 ## Architecture Principles
 
 ### Feature-Based Organization
+
 - All feature code is colocated in `features/[feature]/` folders
 - Each feature is self-contained with its own actions, components, hooks, schemas, and types
 - Promotes modularity, maintainability, and easier refactoring
 
 ### Server-First Approach
+
 - Prefer Server Components by default
 - Use Server Actions for mutations (not API routes)
 - API Routes only for public endpoints consumed by external services
 - Minimize client-side JavaScript bundle size
 
 ### Type Safety
+
 - TypeScript for compile-time type checking
 - Zod for runtime validation and type inference
 - Shared types derived from Zod schemas using `z.infer<>`
 
 ### Validation Strategy
+
 - Zod schemas colocated with features in `_schemas/` folders
 - Validate both client-side and server-side
 - Use `.safeParse()` for error handling
@@ -145,6 +153,7 @@ This is a modern Next.js starter kit built with TypeScript, following feature-ba
 ### Planned Models
 
 **User Model** (Future)
+
 ```prisma
 model User {
   id        String   @id @default(cuid())
@@ -160,12 +169,14 @@ _Note: Actual models will be defined as features are developed._
 ## Development Workflow
 
 ### Branch Strategy
+
 - **main/master**: Production-ready code
 - **feature/**: New features
 - **bugfix/**: Bug fixes
 - **hotfix/**: Urgent production fixes
 
 ### Git Workflow
+
 1. Create feature branch from master
 2. Develop feature
 3. Commit changes with conventional commits
@@ -176,6 +187,7 @@ _Note: Actual models will be defined as features are developed._
 8. Delete feature branch
 
 ### Commit Message Format
+
 ```
 <type>(<scope>): <subject>
 
@@ -189,10 +201,12 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 ## Environment Variables
 
 ### Required
+
 - `DATABASE_URL`: Database connection string
 - `NEXT_PUBLIC_APP_URL`: Application URL
 
 ### Optional
+
 - `LOG_LEVEL`: Logging level (debug, info, warn, error)
 - `API_KEY`: API keys for external services
 

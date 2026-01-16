@@ -370,18 +370,19 @@ git push origin feature/feature-name --force-with-lease
    ```bash
    # Delete the local feature branch (it's already merged)
    git branch -d feature/feature-name
-   
+
    # If branch was force-pushed or has diverged, use -D to force delete
    # git branch -D feature/feature-name
-   
+
    # Delete remote branch (if not auto-deleted by GitHub)
    git push origin --delete feature/feature-name
-   
+
    # Clean up stale remote branch references
    git remote prune origin
    ```
 
    **Why delete merged branches?**
+
    - ✅ Keeps repository clean and organized
    - ✅ All commits remain in git history (nothing is lost)
    - ✅ Can recreate branch from history if needed
@@ -389,18 +390,20 @@ git push origin feature/feature-name --force-with-lease
    - ✅ Makes it clear which branches are active vs merged
 
    **When to keep temporarily (rare cases):**
+
    - Hotfix needed immediately after merge (keep for 1-2 days max)
    - Related follow-up work planned (delete after follow-up is done)
    - Uncertain if merge was successful (verify, then delete)
 
    **Recovering deleted branch (if needed):**
+
    ```bash
    # Find the merge commit
    git log --oneline --merges
-   
+
    # Or find commits by message
    git log --all --grep="feature name" --oneline
-   
+
    # Recreate branch from merge commit
    git checkout -b feature/feature-name <merge-commit-hash>
    ```
