@@ -48,10 +48,7 @@ const dailyRotateFileOptions = {
 };
 
 // Helper function to create DailyRotateFile transport with error handling
-function createDailyRotateTransport(options: {
-  filename: string;
-  level?: string;
-}) {
+function createDailyRotateTransport(options: { filename: string; level?: string }) {
   const transport = new DailyRotateFile({
     ...dailyRotateFileOptions,
     ...options,
