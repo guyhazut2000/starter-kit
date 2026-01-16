@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "version:patch": "npm version patch -m \"chore(release): bump version to %s\" && git push --follow-tags",
+    "version:minor": "npm version minor -m \"chore(release): bump version to %s\" && git push --follow-tags",
+    "version:major": "npm version major -m \"chore(release): bump version to %s\" && git push --follow-tags",
+    "version:prerelease": "npm version prerelease --preid=alpha -m \"chore(release): bump version to %s\" && git push --follow-tags",
+    "version:show": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
     "@prisma/client": "^7.2.0",
