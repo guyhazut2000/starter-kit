@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  ci:
+    name: Lint, Type Check, Test, and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Check code formatting
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm run test:ci
+        env:
+          # Set test environment variables
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          NODE_ENV: "test"
+          LOG_LEVEL: "error"
+          SKIP_ENV_VALIDATION: "true"
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Set required environment variables for build
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://user:password@localhost:5432/dbname' }}
+          NODE_ENV: production
+          LOG_LEVEL: info
+          # Skip environment validation during CI build
+          SKIP_ENV_VALIDATION: true
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
