@@ -1,0 +1,339 @@
+---
+description: Git conventions, commit message format, branch naming, and PR requirements
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Git Conventions
+
+## Commit Message Format
+
+### Conventional Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks (dependencies, build config, etc.)
+- `ci`: CI/CD changes
+- `build`: Build system changes
+- `revert`: Revert previous commit
+
+### Scope (Optional)
+
+- Feature name: `feat(products): add product search`
+- Component name: `fix(ProductCard): resolve image loading issue`
+- Area of codebase: `refactor(auth): simplify login flow`
+
+### Examples
+
+**Good Commit Messages:**
+```
+feat(products): Add product search functionality
+
+Implement search with debouncing and filters.
+Add search results pagination.
+
+Closes #123
+```
+
+```
+fix(auth): Resolve login redirect issue
+
+Fix redirect loop when user is already authenticated.
+Add proper session check before redirect.
+
+Fixes #456
+```
+
+```
+docs: Update README with setup instructions
+
+Add detailed setup instructions for new developers.
+Include environment variable configuration.
+```
+
+```
+refactor(users): Simplify user creation flow
+
+Extract validation logic into separate utility.
+Improve error handling in user creation.
+
+Related to #789
+```
+
+**Bad Commit Messages:**
+```
+Update code
+```
+
+```
+fix
+```
+
+```
+WIP
+```
+
+```
+feat: stuff
+- did things
+- more changes
+```
+
+### Commit Message Rules
+
+- **Subject line**: 50 characters or less, imperative mood
+- **Body**: Explain what and why, wrap at 72 characters
+- **Footer**: Reference issues (`Closes #123`, `Fixes #456`)
+- **One change per commit**: Each commit should do one thing
+- **No period at end of subject**: Keep it concise
+
+## Branch Naming
+
+### Format
+
+```
+<type>/<description>
+```
+
+### Types
+
+- `feature/`: New features
+- `bugfix/` or `fix/`: Bug fixes
+- `hotfix/`: Urgent production fixes
+- `refactor/`: Code refactoring
+- `docs/`: Documentation updates
+- `test/`: Adding tests
+- `chore/`: Maintenance tasks
+
+### Examples
+
+**Good Branch Names:**
+```
+feature/user-authentication
+feature/product-search-with-filters
+bugfix/login-redirect-loop
+hotfix/critical-security-patch
+refactor/api-response-handling
+docs/api-documentation-update
+```
+
+**Bad Branch Names:**
+```
+feature
+fix
+new-feature
+updates
+branch1
+test
+```
+
+### Branch Naming Rules
+
+- Use lowercase letters
+- Use hyphens to separate words
+- Be descriptive but concise
+- Include issue/ticket numbers if applicable: `feature/PROJ-123-user-login`
+- No special characters except hyphens
+
+## Pull Request Guidelines
+
+### PR Title
+
+Follow commit message format:
+```
+<type>: <short description>
+```
+
+Examples:
+- `feat: Add user authentication with OAuth`
+- `fix: Resolve memory leak in image processing`
+- `docs: Update API documentation for v2`
+
+### PR Description Template
+
+```markdown
+## Description
+Brief description of what this PR does and why.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Related Issues
+Closes #123
+Related to #456
+
+## Changes Made
+- Change 1
+- Change 2
+- Change 3
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+- [ ] All tests pass locally
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Comments added for complex code
+- [ ] Documentation updated
+- [ ] No new warnings generated
+- [ ] Tests added/updated and passing
+- [ ] Dependencies updated (if applicable)
+```
+
+### PR Requirements
+
+**Before Creating PR:**
+- [ ] Branch is up to date with `main`
+- [ ] All tests pass locally
+- [ ] Linting passes
+- [ ] Build succeeds
+- [ ] Commit messages follow conventions
+- [ ] PR description is complete
+- [ ] Related issues are linked
+
+**Before Merging:**
+- [ ] At least one approval
+- [ ] All CI checks pass
+- [ ] Branch is up to date
+- [ ] All conversations resolved
+- [ ] PR description is accurate
+
+## Git Workflow
+
+### Creating a Branch
+
+```bash
+# Update main branch
+git checkout main
+git pull origin main
+
+# Create and switch to new branch
+git checkout -b feature/feature-name
+
+# Or in one command
+git checkout -b feature/feature-name main
+```
+
+### Making Commits
+
+```bash
+# Stage changes
+git add .
+
+# Or stage specific files
+git add path/to/file.ts
+
+# Commit with message
+git commit -m "feat(products): Add product search"
+
+# Or use interactive commit for longer messages
+git commit
+```
+
+### Syncing with Main
+
+```bash
+# Fetch latest changes
+git fetch origin
+
+# Update feature branch from main
+git checkout feature/feature-name
+git merge main
+# or
+git rebase main
+```
+
+### Pushing Changes
+
+```bash
+# Push branch to remote
+git push origin feature/feature-name
+
+# Push and set upstream
+git push -u origin feature/feature-name
+
+# Force push (use with caution, only if needed)
+git push --force-with-lease
+```
+
+## Commit Frequency
+
+- **Small, frequent commits**: Commit logical units of work
+- **One change per commit**: Each commit should do one thing
+- **Commit often**: Don't wait until feature is complete
+- **Meaningful commits**: Each commit should be meaningful and reviewable
+
+## Best Practices
+
+### DO
+
+- ✅ Write clear, descriptive commit messages
+- ✅ Use Conventional Commits format
+- ✅ Reference issues in commit messages
+- ✅ Keep commits small and focused
+- ✅ Test before committing
+- ✅ Sync with main regularly
+- ✅ Review your own commits before pushing
+
+### DON'T
+
+- ❌ Commit directly to `main` branch
+- ❌ Write vague commit messages
+- ❌ Commit broken code
+- ❌ Commit large, unrelated changes together
+- ❌ Force push to `main`
+- ❌ Skip pre-commit hooks (if configured)
+- ❌ Commit secrets or credentials
+
+## Pre-commit Hooks (If Configured)
+
+If using Husky or similar:
+- Run linting on staged files
+- Run formatting on staged files
+- Run type checking
+- Prevent commits with errors
+
+## Merge Strategies
+
+### Squash and Merge (Recommended)
+- Combines all commits into a single commit
+- Cleaner git history
+- Easier to revert if needed
+- Use for feature branches
+
+### Merge Commit
+- Preserves individual commit history
+- Use when commit history is important
+- Creates merge commit in history
+
+### Rebase and Merge
+- Linear history without merge commits
+- Use when you want completely linear history
+- Can be more complex for reviewers
+
+## Reference
+
+For detailed workflow guidelines, see `github_flow.mdc`.

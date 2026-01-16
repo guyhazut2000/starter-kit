@@ -1,0 +1,553 @@
+---
+description: Testing conventions, test file locations, frameworks, mocking patterns, and what to test
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Testing Guidelines
+
+## Testing Philosophy
+
+- **Test behavior, not implementation**: Focus on what users see and do
+- **Test user-facing functionality**: Ensure features work as expected
+- **Test error and edge cases**: Don't just test happy paths
+- **Keep tests maintainable**: Tests should be easy to understand and update
+- **Fast feedback**: Tests should run quickly for developer productivity
+
+## Testing Stack
+
+### Core Tools
+- **Jest**: Test runner and assertion library
+- **React Testing Library**: Component testing utilities
+- **@testing-library/user-event**: User interaction simulation
+- **@testing-library/jest-dom**: Additional DOM matchers
+
+### Optional Tools
+- **MSW (Mock Service Worker)**: API mocking for integration tests
+- **Playwright** or **Cypress**: E2E testing (if needed)
+- **@tanstack/react-query** testing utilities
+
+## Test File Locations
+
+### Colocated Tests (Recommended)
+
+**Structure:**
+```
+features/
+  products/
+    _components/
+      ProductCard.tsx
+      ProductCard.test.tsx        # Colocated test
+    _actions/
+      product-actions.ts
+      product-actions.test.ts     # Colocated test
+    _hooks/
+      useProducts.ts
+      useProducts.test.ts         # Colocated test
+    _lib/
+      product-utils.ts
+      product-utils.test.ts       # Colocated test
+```
+
+**Benefits:**
+- Easy to find tests
+- Tests stay with code
+- Easy to delete when removing features
+
+### Separate Test Directory (Alternative)
+
+**Structure:**
+```
+__tests__/
+  features/
+    products/
+      _components/
+        ProductCard.test.tsx
+```
+
+**Use when:**
+- Test files are very large
+- Team prefers separate test directory
+- Tests need special organization
+
+## What to Test
+
+### ✅ DO Test
+
+**Server Components:**
+- Data fetching and rendering
+- Error handling and error boundaries
+- Loading states
+- Server-side logic and transformations
+
+**Client Components:**
+- User interactions (clicks, form submissions, input changes)
+- State management and updates
+- Event handlers
+- Conditional rendering
+- Accessibility (if applicable)
+
+**Server Actions:**
+- Input validation (Zod schema validation)
+- Success cases
+- Error handling
+- Return values and formats
+- Database operations (mocked)
+
+**Hooks:**
+- State updates
+- Side effects
+- Return values
+- Error handling
+
+**Utilities:**
+- All utility functions
+- Edge cases and boundary conditions
+- Error handling
+- Type transformations
+
+**Forms:**
+- Form submission
+- Validation (client and server)
+- Error display
+- Success states
+- Field interactions
+
+**API Routes:**
+- Request validation
+- Response formats
+- Status codes
+- Error handling
+- Authentication/authorization
+
+### ❌ DON'T Test
+
+- **Implementation details**: Internal state, private methods
+- **Third-party libraries**: Don't test library functionality
+- **Framework code**: Next.js, React internals
+- **Styling**: CSS and visual appearance (unless critical)
+- **Generated code**: Prisma Client, auto-generated types
+
+## Testing Patterns
+
+### Server Component Test
+
+```typescript
+// features/products/_components/ProductList.test.tsx
+import { render } from "@testing-library/react";
+import ProductList from "./ProductList";
+import { fetchProducts } from "@/features/products/_lib/product-service";
+
+jest.mock("@/features/products/_lib/product-service");
+
+describe("ProductList", () => {
+  it("renders products correctly", async () => {
+    const mockProducts = [
+      { id: "1", name: "Product 1", price: 100 },
+      { id: "2", name: "Product 2", price: 200 },
+    ];
+    
+    (fetchProducts as jest.Mock).mockResolvedValue(mockProducts);
+    
+    const { getByText } = await render(<ProductList />);
+    
+    expect(getByText("Product 1")).toBeInTheDocument();
+    expect(getByText("Product 2")).toBeInTheDocument();
+  });
+  
+  it("handles empty state", async () => {
+    (fetchProducts as jest.Mock).mockResolvedValue([]);
+    
+    const { getByText } = await render(<ProductList />);
+    
+    expect(getByText("No products found")).toBeInTheDocument();
+  });
+  
+  it("handles errors gracefully", async () => {
+    (fetchProducts as jest.Mock).mockRejectedValue(new Error("Failed"));
+    
+    const { getByText } = await render(<ProductList />);
+    
+    expect(getByText(/error/i)).toBeInTheDocument();
+  });
+});
+```
+
+### Client Component Test
+
+```typescript
+// features/products/_components/ProductCard.test.tsx
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ProductCard } from "./ProductCard";
+import { addToCart } from "@/features/products/_actions/cart-actions";
+
+jest.mock("@/features/products/_actions/cart-actions");
+
+describe("ProductCard", () => {
+  const mockProduct = {
+    id: "1",
+    name: "Test Product",
+    price: 100,
+    description: "Test description",
+  };
+  
+  it("renders product information", () => {
+    render(<ProductCard product={mockProduct} />);
+    
+    expect(screen.getByText("Test Product")).toBeInTheDocument();
+    expect(screen.getByText("Test description")).toBeInTheDocument();
+    expect(screen.getByText("$100")).toBeInTheDocument();
+  });
+  
+  it("calls addToCart when button is clicked", async () => {
+    const user = userEvent.setup();
+    (addToCart as jest.Mock).mockResolvedValue({ success: true });
+    
+    render(<ProductCard product={mockProduct} />);
+    
+    const button = screen.getByRole("button", { name: /add to cart/i });
+    await user.click(button);
+    
+    expect(addToCart).toHaveBeenCalledWith("1");
+  });
+  
+  it("shows loading state during add to cart", async () => {
+    const user = userEvent.setup();
+    (addToCart as jest.Mock).mockImplementation(
+      () => new Promise(resolve => setTimeout(resolve, 100))
+    );
+    
+    render(<ProductCard product={mockProduct} />);
+    
+    const button = screen.getByRole("button", { name: /add to cart/i });
+    await user.click(button);
+    
+    expect(button).toBeDisabled();
+    expect(screen.getByText(/adding/i)).toBeInTheDocument();
+  });
+});
+```
+
+### Server Action Test
+
+```typescript
+// features/users/_actions/user-actions.test.ts
+import { createUser } from "./user-actions";
+import { prisma } from "@/lib/prisma";
+
+jest.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      create: jest.fn(),
+    },
+  },
+}));
+
+describe("createUser", () => {
+  it("creates user with valid data", async () => {
+    const formData = new FormData();
+    formData.append("name", "John Doe");
+    formData.append("email", "john@example.com");
+    
+    (prisma.user.create as jest.Mock).mockResolvedValue({
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    
+    const result = await createUser(formData);
+    
+    expect(result.success).toBe(true);
+    expect(prisma.user.create).toHaveBeenCalledWith({
+      data: {
+        name: "John Doe",
+        email: "john@example.com",
+      },
+    });
+  });
+  
+  it("returns error for invalid data", async () => {
+    const formData = new FormData();
+    // Missing required fields
+    
+    const result = await createUser(formData);
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toBeDefined();
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+  
+  it("handles database errors", async () => {
+    const formData = new FormData();
+    formData.append("name", "John Doe");
+    formData.append("email", "john@example.com");
+    
+    (prisma.user.create as jest.Mock).mockRejectedValue(
+      new Error("Database error")
+    );
+    
+    const result = await createUser(formData);
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+});
+```
+
+### Hook Test
+
+```typescript
+// features/products/_hooks/useProducts.test.ts
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useProducts } from "./useProducts";
+
+// Mock fetch
+global.fetch = jest.fn();
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+}
+
+describe("useProducts", () => {
+  beforeEach(() => {
+    (fetch as jest.Mock).mockClear();
+  });
+  
+  it("fetches products successfully", async () => {
+    const mockProducts = [{ id: "1", name: "Product 1" }];
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockProducts,
+    });
+    
+    const { result } = renderHook(() => useProducts(), {
+      wrapper: createWrapper(),
+    });
+    
+    expect(result.current.isLoading).toBe(true);
+    
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    expect(result.current.data).toEqual(mockProducts);
+    expect(result.current.error).toBeNull();
+  });
+  
+  it("handles fetch errors", async () => {
+    (fetch as jest.Mock).mockRejectedValueOnce(new Error("Fetch failed"));
+    
+    const { result } = renderHook(() => useProducts(), {
+      wrapper: createWrapper(),
+    });
+    
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+    
+    expect(result.current.data).toBeUndefined();
+  });
+});
+```
+
+### Utility Test
+
+```typescript
+// features/products/_lib/product-utils.test.ts
+import { formatPrice, calculateTotal } from "./product-utils";
+
+describe("formatPrice", () => {
+  it("formats price correctly", () => {
+    expect(formatPrice(100)).toBe("$100.00");
+    expect(formatPrice(99.99)).toBe("$99.99");
+    expect(formatPrice(0)).toBe("$0.00");
+  });
+  
+  it("handles negative prices", () => {
+    expect(formatPrice(-10)).toBe("-$10.00");
+  });
+});
+
+describe("calculateTotal", () => {
+  it("calculates total correctly", () => {
+    const items = [
+      { price: 10, quantity: 2 },
+      { price: 5, quantity: 3 },
+    ];
+    
+    expect(calculateTotal(items)).toBe(35);
+  });
+  
+  it("handles empty array", () => {
+    expect(calculateTotal([])).toBe(0);
+  });
+});
+```
+
+## Mocking Patterns
+
+### Mock Server Actions
+
+```typescript
+jest.mock("@/features/products/_actions/cart-actions", () => ({
+  addToCart: jest.fn(),
+  removeFromCart: jest.fn(),
+}));
+```
+
+### Mock Prisma
+
+```typescript
+jest.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+    },
+  },
+}));
+```
+
+### Mock Next.js Modules
+
+```typescript
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+  }),
+  usePathname: () => "/current-path",
+}));
+```
+
+### Mock Fetch/API
+
+```typescript
+global.fetch = jest.fn();
+
+(fetch as jest.Mock).mockResolvedValue({
+  ok: true,
+  json: async () => ({ data: "test" }),
+});
+```
+
+## Test Coverage Goals
+
+- **Minimum**: 70% code coverage
+- **Target**: 80%+ code coverage
+- **Critical paths**: 100% coverage
+  - Authentication flows
+  - Payment processing
+  - Data mutations
+  - Security-sensitive code
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- ProductCard.test.tsx
+
+# Run tests matching pattern
+npm test -- --testNamePattern="renders"
+
+# Run tests in CI mode
+npm test -- --ci --coverage --maxWorkers=2
+```
+
+## Test Best Practices
+
+### DO
+
+- ✅ Write descriptive test names that explain what is being tested
+- ✅ Use `screen.getByRole` and accessible queries first
+- ✅ Test user-facing behavior, not implementation
+- ✅ Keep tests isolated and independent
+- ✅ Clean up after tests (reset mocks, clear state)
+- ✅ Use `waitFor` for async operations
+- ✅ Test error and edge cases
+- ✅ Mock external dependencies
+- ✅ Use `userEvent` for user interactions
+
+### DON'T
+
+- ❌ Test implementation details
+- ❌ Use `getByTestId` as first choice
+- ❌ Test third-party library functionality
+- ❌ Write tests that are too coupled to implementation
+- ❌ Skip testing error cases
+- ❌ Test multiple things in one test
+- ❌ Use `act()` unnecessarily (React Testing Library handles it)
+- ❌ Leave console.log in tests
+
+## Test Organization
+
+### Test Structure
+
+```typescript
+describe("ComponentName", () => {
+  // Setup (beforeEach, mocks, etc.)
+  
+  describe("rendering", () => {
+    it("renders correctly", () => {
+      // ...
+    });
+  });
+  
+  describe("interactions", () => {
+    it("handles click", () => {
+      // ...
+    });
+  });
+  
+  describe("error handling", () => {
+    it("handles errors gracefully", () => {
+      // ...
+    });
+  });
+});
+```
+
+### Test Data
+
+**Create test fixtures:**
+```typescript
+// features/products/_lib/__fixtures__/products.ts
+export const mockProduct = {
+  id: "1",
+  name: "Test Product",
+  price: 100,
+  description: "Test description",
+};
+
+export const mockProducts = [mockProduct, { ...mockProduct, id: "2" }];
+```
+
+## Continuous Integration
+
+- Run tests on every PR
+- Fail build if tests fail
+- Generate coverage reports
+- Enforce minimum coverage threshold
+- Run tests in parallel for speed

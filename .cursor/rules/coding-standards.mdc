@@ -1,0 +1,412 @@
+---
+description: Coding conventions, naming patterns, file organization, import ordering, and error handling approach
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Coding Standards
+
+## Naming Conventions
+
+### Files and Folders
+
+**Components:**
+- PascalCase for component files: `ProductCard.tsx`, `UserProfile.tsx`
+- Match component name to file name: `export function ProductCard` in `ProductCard.tsx`
+
+**Utilities and Hooks:**
+- camelCase for utilities: `formatDate.ts`, `parseFormData.ts`
+- camelCase with `use` prefix for hooks: `useAuth.ts`, `useProducts.ts`
+
+**Server Actions:**
+- kebab-case: `user-actions.ts`, `product-actions.ts`
+- Descriptive action names: `create-user.ts`, `update-product.ts`
+
+**Zod Schemas:**
+- kebab-case: `user-schema.ts`, `product-schema.ts`
+- Located in `features/[feature]/_schemas/`
+
+**Types:**
+- kebab-case or camelCase: `user.ts`, `product-types.ts`
+- Located in `features/[feature]/_types/`
+
+**Routes:**
+- lowercase with hyphens: `user-profile`, `product-details`
+- Descriptive and URL-friendly
+
+**Feature Folders:**
+- lowercase, singular: `auth/`, `products/`, `users/`
+- Clear, domain-focused names
+
+### Code Naming
+
+**Variables and Functions:**
+- camelCase: `userName`, `fetchProducts`, `handleSubmit`
+- Descriptive names: `isLoading` not `loading`, `userEmail` not `email`
+- Boolean prefixes: `is`, `has`, `should`, `can` (e.g., `isActive`, `hasPermission`)
+
+**Constants:**
+- UPPER_SNAKE_CASE: `MAX_RETRY_COUNT`, `API_BASE_URL`
+- Group related constants in files
+
+**Types and Interfaces:**
+- PascalCase: `User`, `Product`, `UserProfileProps`
+- Interface suffix for props: `ComponentNameProps`
+- Type suffix for unions/aliases: `UserStatus`, `ProductType`
+
+**Enums:**
+- PascalCase: `UserRole`, `OrderStatus`
+- Enum values: PascalCase or UPPER_SNAKE_CASE (be consistent)
+
+**Private/Internal:**
+- Prefix with underscore: `_internalFunction`, `_privateVariable`
+- Private folders: `_components/`, `_actions/`, `_lib/`
+
+## File Organization Patterns
+
+### Feature Structure
+
+Each feature follows this structure:
+```
+features/[feature]/
+├── _actions/          # Server Actions
+├── _components/       # Feature components
+├── _hooks/            # Feature hooks
+├── _lib/              # Feature utilities
+├── _schemas/          # Zod schemas
+└── _types/            # TypeScript types
+```
+
+### Component Organization
+
+**Feature Components:**
+- Colocated in `features/[feature]/_components/`
+- One component per file
+- Related components can share a folder if needed
+
+**Shared UI Components:**
+- Base components in `components/ui/`
+- Layout components in `components/layout/`
+- Only truly reusable components
+
+**Route Components:**
+- Route-specific in `app/[route]/_components/`
+- Can import from feature folders
+
+### Import Organization
+
+**Import Order:**
+1. React and Next.js imports
+2. Third-party library imports
+3. Shared utilities (from `@/lib/`)
+4. Feature imports (from `@/features/`)
+5. Component imports (from `@/components/`)
+6. Relative imports (from `./` or `../`)
+
+**Example:**
+```typescript
+// 1. React and Next.js
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+// 2. Third-party libraries
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+
+// 3. Shared utilities
+import { formatDate } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
+
+// 4. Feature imports
+import { createUser } from "@/features/users/_actions/user-actions";
+import type { User } from "@/features/users/_types/user";
+import { UserCard } from "@/features/users/_components/UserCard";
+
+// 5. Shared components
+import { Button } from "@/components/ui/Button";
+
+// 6. Relative imports
+import { UserActions } from "./_components/UserActions";
+```
+
+**Import Style:**
+- Use named imports when possible
+- Use `import type` for type-only imports
+- Group imports with blank lines between groups
+- Sort imports alphabetically within groups
+
+## Code Style
+
+### TypeScript
+
+**Type Annotations:**
+- Explicit return types for functions (especially public APIs)
+- Use `type` for unions, intersections, aliases
+- Use `interface` for object shapes (especially props)
+- Prefer `type` for component props
+
+**Example:**
+```typescript
+// ✅ GOOD
+interface ProductCardProps {
+  product: Product;
+  onAddToCart?: (id: string) => void;
+}
+
+export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  // ...
+}
+
+// ✅ GOOD
+type UserStatus = "active" | "inactive" | "pending";
+
+// ❌ BAD
+export function ProductCard({ product }: { product: Product }) {
+  // ...
+}
+```
+
+**Type Safety:**
+- Avoid `any` - use `unknown` and type guards
+- Use type assertions sparingly (`as` only when necessary)
+- Prefer type inference when types are obvious
+- Use `satisfies` for type checking without widening
+
+### React Patterns
+
+**Component Structure:**
+```typescript
+// 1. Imports
+import { useState } from "react";
+
+// 2. Types/Interfaces
+interface ComponentProps {
+  // ...
+}
+
+// 3. Component
+export function Component({ prop }: ComponentProps) {
+  // 4. Hooks
+  const [state, setState] = useState();
+  
+  // 5. Event handlers
+  const handleClick = () => {
+    // ...
+  };
+  
+  // 6. Effects
+  useEffect(() => {
+    // ...
+  }, []);
+  
+  // 7. Render
+  return (
+    // JSX
+  );
+}
+```
+
+**Hooks:**
+- Custom hooks in `features/[feature]/_hooks/`
+- Prefix with `use`: `useAuth`, `useProducts`
+- Return objects, not arrays (for better naming)
+- One hook per file
+
+**Server Components:**
+- Default to Server Components
+- Only use `"use client"` when necessary
+- Keep Server Components async when fetching data
+
+**Client Components:**
+- Mark with `"use client"` directive
+- Use at the top of the file
+- Minimize client components (prefer Server Components)
+
+### Error Handling Approach
+
+**Server Actions:**
+```typescript
+"use server";
+
+export async function createUser(formData: FormData) {
+  try {
+    // Validate with Zod
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error.errors.map(e => e.message).join(", "),
+        fieldErrors: result.error.flatten().fieldErrors,
+      };
+    }
+    
+    // Business logic
+    // ...
+    
+    return { success: true, data: result };
+  } catch (error) {
+    // Log error (server-side)
+    console.error("Error creating user:", error);
+    
+    // Return user-friendly error
+    return {
+      success: false,
+      error: "Failed to create user. Please try again.",
+    };
+  }
+}
+```
+
+**Error Boundaries:**
+- Use `error.tsx` files for route-level error boundaries
+- Provide recovery options (retry, go back)
+- Don't expose technical error details to users
+- Log errors for debugging
+
+**API Routes:**
+```typescript
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    
+    // Validate
+    const result = schema.safeParse(body);
+    if (!result.success) {
+      return Response.json(
+        { error: "Validation failed", details: result.error.errors },
+        { status: 400 }
+      );
+    }
+    
+    // Process
+    // ...
+    
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Client-Side Error Handling:**
+```typescript
+"use client";
+
+export function Component() {
+  const [error, setError] = useState<string | null>(null);
+  
+  async function handleAction() {
+    try {
+      setError(null);
+      const result = await action();
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      // Handle success
+    } catch (err) {
+      setError("An unexpected error occurred");
+    }
+  }
+  
+  return (
+    <div>
+      {error && <div className="error">{error}</div>}
+      {/* ... */}
+    </div>
+  );
+}
+```
+
+## Code Quality Rules
+
+### DO
+
+- ✅ Use descriptive, meaningful names
+- ✅ Keep functions small and focused (single responsibility)
+- ✅ Extract reusable logic into utilities or hooks
+- ✅ Use TypeScript types for all props and functions
+- ✅ Validate all inputs with Zod schemas
+- ✅ Handle errors gracefully with user-friendly messages
+- ✅ Write self-documenting code (clear naming over comments)
+- ✅ Use early returns to reduce nesting
+- ✅ Prefer composition over inheritance
+- ✅ Keep components small and focused
+- ✅ Use const assertions for immutable data
+- ✅ Destructure props in function parameters
+
+### DON'T
+
+- ❌ Use `any` type (use `unknown` with type guards)
+- ❌ Skip validation (always validate with Zod)
+- ❌ Expose technical error details to users
+- ❌ Create overly large components or functions
+- ❌ Mix concerns (separate UI, logic, data fetching)
+- ❌ Use magic numbers or strings (use constants)
+- ❌ Duplicate code (extract to utilities)
+- ❌ Use `var` (use `const` or `let`)
+- ❌ Mutate props or state directly
+- ❌ Use `==` (use `===` for strict equality)
+- ❌ Leave console.log in production code (use proper logging)
+
+## Comments and Documentation
+
+**When to Comment:**
+- Complex business logic that isn't obvious
+- Workarounds for third-party library issues
+- Public API functions (JSDoc comments)
+- Non-obvious performance optimizations
+
+**Comment Style:**
+```typescript
+/**
+ * Creates a new user with validated data.
+ * 
+ * @param formData - Form data containing user information
+ * @returns Success result with userId or error details
+ */
+export async function createUser(formData: FormData) {
+  // Complex validation logic
+  // ...
+}
+```
+
+**Self-Documenting Code:**
+- Prefer clear naming over comments
+- Extract complex logic into well-named functions
+- Use TypeScript types to document data structures
+
+## Formatting
+
+**General:**
+- Use 2 spaces for indentation
+- Use semicolons consistently
+- Use single quotes for strings (or double - be consistent)
+- Trailing commas in multi-line objects/arrays
+- Max line length: 100 characters (soft limit)
+
+**JSX:**
+- Self-closing tags when no children
+- Props on separate lines for readability
+- Consistent prop ordering: key, className, event handlers, other props
+
+**Example:**
+```typescript
+<ProductCard
+  key={product.id}
+  className="mb-4"
+  product={product}
+  onAddToCart={handleAddToCart}
+  disabled={isLoading}
+/>
+```
+
+## Consistency
+
+- Follow established patterns in the codebase
+- When in doubt, match existing code style
+- Use linters and formatters to enforce consistency
+- Review code for consistency during PR reviews

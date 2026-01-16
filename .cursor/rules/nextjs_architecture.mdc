@@ -1,0 +1,1845 @@
+---
+description: Next.js 14+ App Router architecture, project structure, and best practices - always apply for all development work
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Next.js Architecture and Best Practices
+
+## 1. Core Principles
+
+### Server-First Approach
+
+- **Prefer Server Components**: Use Server Components by default. They render on the server, reducing client-side JavaScript and improving performance.
+- **Server Actions over API Routes**: Use Server Actions for form submissions, mutations, and server-side operations. Only use API Routes (`route.ts`) for public API endpoints that need to be consumed by external services or third-party applications.
+- **Server Rendering**: Prefer server-side rendering (SSR) and static generation when possible. Use client components (`"use client"`) only when necessary (interactivity, browser APIs, hooks, event handlers).
+
+### Code Organization
+
+- **Separation of Concerns**: Don't put all code in page files. Separate into reusable components, utilities, and services.
+- **Colocation**: Keep related code together. Route-specific components, hooks, and utilities should be colocated with their routes.
+- **Clean Architecture**: Maintain clear boundaries between UI components, business logic, data fetching, and utilities.
+
+### Error and Loading Handling
+
+- **Loading States**: Always provide loading states using Next.js `loading.tsx` files or Suspense boundaries.
+- **Error Boundaries**: Implement proper error handling using `error.tsx` files and error boundaries.
+- **User Feedback**: Provide clear feedback for all async operations (loading, success, error states).
+
+## 2. Server Actions vs API Routes
+
+### When to Use Server Actions (Preferred)
+
+**Use Server Actions for:**
+
+- Form submissions and mutations
+- Database operations (create, update, delete)
+- Server-side data mutations
+- Internal API calls (not exposed to external clients)
+- Operations that don't need RESTful endpoints
+- Actions that benefit from progressive enhancement
+
+**Example Server Action with Zod:**
+
+```typescript
+// features/users/_actions/user-actions.ts
+"use server";
+
+import { z } from "zod";
+import { userSchema } from "@/features/users/_schemas/user-schema";
+
+const createUserSchema = userSchema.pick({ name: true, email: true });
+
+export async function createUser(formData: FormData) {
+  // Parse and validate with Zod
+  const rawData = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+  };
+
+  const result = createUserSchema.safeParse(rawData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors.map((e) => e.message).join(", "),
+    };
+  }
+
+  const { name, email } = result.data;
+
+  // Save to database
+  // ...
+
+  return { success: true, userId: newUser.id };
+}
+```
+
+**Benefits:**
+
+- Type-safe end-to-end
+- Automatic request/response handling
+- Built-in security (CSRF protection)
+- Progressive enhancement support
+- Simpler code (no need to define routes)
+
+### When to Use API Routes
+
+**Use API Routes (`route.ts`) ONLY for:**
+
+- **Public API endpoints** that need to be consumed by:
+  - External services
+  - Third-party applications
+  - Mobile apps
+  - Webhooks
+  - OAuth callbacks
+  - Any non-Next.js client
+
+**Example API Route:**
+
+```typescript
+// app/api/users/route.ts
+import { z } from "zod";
+import { createUserSchema } from "@/features/users/_schemas/user-schema";
+
+export async function GET(request: Request) {
+  // Public API endpoint for external services
+  return Response.json({ users: [...] });
+}
+
+export async function POST(request: Request) {
+  // Public API endpoint
+  const body = await request.json();
+
+  // Validate with Zod schema from feature
+  const result = createUserSchema.safeParse(body);
+  if (!result.success) {
+    return Response.json({ error: "Invalid data" }, { status: 400 });
+  }
+
+  // Process and return
+  return Response.json({ success: true });
+}
+```
+
+**Decision Tree:**
+
+- Is this endpoint consumed by external services? → Use API Route
+- Is this for internal Next.js app use only? → Use Server Action
+- Does this need to be a RESTful endpoint? → Use API Route
+- Is this a form submission or mutation? → Use Server Action
+
+## 3. Server Rendering Best Practices
+
+### Server Components (Default)
+
+**Use Server Components when:**
+
+- Fetching data from databases or APIs
+- Accessing backend resources (file system, etc.)
+- Keeping sensitive information on the server (API keys, tokens)
+- Reducing client-side JavaScript bundle size
+- Rendering static or dynamic content
+
+**Example:**
+
+```typescript
+// app/products/page.tsx (Server Component by default)
+async function getProducts() {
+  const res = await fetch("https://api.example.com/products");
+  return res.json();
+}
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+
+  return (
+    <div>
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Client Components (When Needed)
+
+**Use Client Components (`"use client"`) when:**
+
+- Using React hooks (`useState`, `useEffect`, `useContext`, etc.)
+- Handling browser-only APIs (`window`, `document`, `localStorage`, etc.)
+- Adding event listeners (`onClick`, `onChange`, etc.)
+- Using third-party libraries that require client-side JavaScript
+- Managing client-side state or interactivity
+
+**Example:**
+
+```typescript
+// features/products/_components/InteractiveButton.tsx
+"use client";
+
+import { useState } from "react";
+
+export function InteractiveButton() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <button onClick={() => setCount(count + 1)}>Clicked {count} times</button>
+  );
+}
+```
+
+### Hybrid Approach
+
+**Best Practice**: Keep Server Components as the default, and only mark specific components as client components when needed. This minimizes the client-side JavaScript bundle.
+
+```typescript
+// Server Component (default)
+export default async function Page() {
+  const data = await fetchData();
+
+  // Client Component for interactivity
+  return (
+    <div>
+      <ServerRenderedContent data={data} />
+      <InteractiveForm /> {/* 'use client' component */}
+    </div>
+  );
+}
+```
+
+## 4. Project Structure
+
+### Recommended Folder Structure (Feature-Based)
+
+```
+/
+├── app/                      # Next.js App Router
+│   ├── (auth)/              # Route group (doesn't affect URL)
+│   │   ├── login/
+│   │   │   ├── page.tsx
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
+│   │   │   └── _components/ # Private folder (not a route)
+│   │   │       └── LoginForm.tsx
+│   │   └── layout.tsx
+│   ├── (dashboard)/
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx
+│   │   │   └── _components/
+│   │   └── layout.tsx
+│   ├── api/                 # API Routes (public endpoints only)
+│   │   └── webhooks/
+│   │       └── route.ts
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Home page
+│   ├── loading.tsx          # Global loading UI
+│   ├── error.tsx            # Global error boundary
+│   └── not-found.tsx        # 404 page
+├── features/                # Feature-based organization
+│   ├── auth/                # Authentication feature
+│   │   ├── _actions/        # Server Actions for auth
+│   │   │   └── auth-actions.ts
+│   │   ├── _components/     # Auth-specific components
+│   │   │   ├── LoginForm.tsx
+│   │   │   └── SignupForm.tsx
+│   │   ├── _hooks/          # Auth-specific hooks
+│   │   │   └── useAuth.ts
+│   │   ├── _lib/            # Auth utilities
+│   │   │   └── validations.ts
+│   │   ├── _schemas/        # Zod schemas for auth
+│   │   │   └── auth-schema.ts
+│   │   └── _types/          # Auth types
+│   │       └── auth.ts
+│   ├── products/             # Products feature
+│   │   ├── _actions/
+│   │   │   └── product-actions.ts
+│   │   ├── _components/
+│   │   │   ├── ProductCard.tsx
+│   │   │   └── ProductList.tsx
+│   │   ├── _hooks/
+│   │   │   └── useProducts.ts
+│   │   ├── _lib/
+│   │   │   └── product-utils.ts
+│   │   ├── _schemas/
+│   │   │   └── product-schema.ts
+│   │   └── _types/
+│   │       └── product.ts
+│   └── users/                # Users feature
+│       ├── _actions/
+│       │   └── user-actions.ts
+│       ├── _components/
+│       │   └── UserProfile.tsx
+│       ├── _hooks/
+│       │   └── useUser.ts
+│       ├── _lib/
+│       │   └── user-utils.ts
+│       ├── _schemas/
+│       │   └── user-schema.ts
+│       └── _types/
+│           └── user.ts
+├── components/              # Shared UI components (minimal)
+│   ├── ui/                  # Base UI components (buttons, inputs, etc.)
+│   │   ├── Button.tsx
+│   │   └── Input.tsx
+│   └── layout/              # Layout components
+│       ├── Header.tsx
+│       └── Footer.tsx
+├── lib/                     # Shared utilities (truly global)
+│   ├── prisma.ts            # Prisma client instance
+│   ├── utils.ts             # Common utilities
+│   └── constants.ts         # Global constants
+├── services/                # External services (shared)
+│   ├── api-client.ts
+│   └── database.ts
+├── styles/                  # Global styles
+│   └── globals.css
+├── public/                  # Static assets
+│   ├── images/
+│   └── icons/
+└── [config files]          # next.config.ts, tsconfig.json, etc.
+```
+
+### Key Structural Principles
+
+1. **Feature-Based Organization**: Each feature has its own folder with all related code colocated
+2. **Feature Folders**: Use `features/` directory for feature organization
+3. **Private Folders in Features**: Prefix with `_` to organize feature code:
+   - `_actions/` - Server Actions for the feature
+   - `_components/` - Components for the feature
+   - `_hooks/` - Hooks for the feature
+   - `_lib/` - Utilities for the feature
+   - `_schemas/` - Zod schemas for the feature
+   - `_types/` - TypeScript types for the feature
+4. **Route Groups**: Use parentheses `(groupName)` to organize routes without affecting URLs
+5. **Minimal Shared Code**: Only truly shared code goes in global folders (`components/ui/`, `lib/`)
+6. **Colocation**: All feature-related code stays within the feature folder
+
+## 5. Component Organization
+
+### Component Hierarchy
+
+**Shared UI Components** (`components/ui/`):
+
+- Base UI components used across ALL features (Button, Input, Card, etc.)
+- Only truly reusable, generic components
+- Should be framework/library agnostic
+
+**Layout Components** (`components/layout/`):
+
+- Global layout components (Header, Footer, Sidebar)
+- Site-wide navigation and structure
+
+**Feature Components** (`features/[feature]/_components/`):
+
+- All components specific to a feature
+- Colocated with the feature's actions, hooks, types, etc.
+- Can be used within the feature's routes or shared with other features via imports
+- Example: `features/products/_components/ProductCard.tsx`
+
+**Route-Specific Components** (`app/route/_components/`):
+
+- Components only used within a specific route/page
+- Keep them colocated with the route for easy maintenance
+- Can import from feature folders as needed
+
+### Component Best Practices
+
+**DO:**
+
+- ✅ Keep components small and focused (single responsibility)
+- ✅ Extract reusable logic into custom hooks
+- ✅ Use TypeScript for type safety
+- ✅ Separate Server and Client Components clearly
+- ✅ Colocate related components together
+- ✅ Use meaningful, descriptive component names
+
+**DON'T:**
+
+- ❌ Put all code directly in page files
+- ❌ Create overly large, monolithic components
+- ❌ Mix server and client code unnecessarily
+- ❌ Duplicate code across components
+- ❌ Create components that do too many things
+
+### Example: Proper Component Separation
+
+```typescript
+// ❌ BAD: Everything in page file
+// app/products/page.tsx
+export default async function ProductsPage() {
+  const products = await fetchProducts();
+
+  return (
+    <div>
+      <h1>Products</h1>
+      {products.map((product) => (
+        <div key={product.id}>
+          <h2>{product.name}</h2>
+          <p>{product.description}</p>
+          <button onClick={() => addToCart(product.id)}>Add to Cart</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ✅ GOOD: Feature-based structure
+// app/products/page.tsx
+import { ProductList } from "./_components/ProductList";
+import { fetchProducts } from "@/features/products/_lib/product-service";
+
+export default async function ProductsPage() {
+  const products = await fetchProducts();
+
+  return (
+    <div>
+      <h1>Products</h1>
+      <ProductList products={products} />
+    </div>
+  );
+}
+
+// app/products/_components/ProductList.tsx
+import { ProductCard } from "@/features/products/_components/ProductCard";
+import type { Product } from "@/features/products/_types/product";
+
+interface ProductListProps {
+  products: Product[];
+}
+
+export function ProductList({ products }: ProductListProps) {
+  return (
+    <div className="grid">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+// features/products/_components/ProductCard.tsx
+("use client");
+
+import { useState } from "react";
+import { addToCart } from "@/features/products/_actions/cart-actions";
+import type { Product } from "@/features/products/_types/product";
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export function ProductCard({ product }: ProductCardProps) {
+  const [isAdding, setIsAdding] = useState(false);
+
+  async function handleAddToCart() {
+    setIsAdding(true);
+    await addToCart(product.id);
+    setIsAdding(false);
+  }
+
+  return (
+    <div>
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <button onClick={handleAddToCart} disabled={isAdding}>
+        {isAdding ? "Adding..." : "Add to Cart"}
+      </button>
+    </div>
+  );
+}
+```
+
+## 6. Loading States
+
+### Using `loading.tsx` Files
+
+**Route-level loading:**
+
+```typescript
+// app/products/loading.tsx
+export default function Loading() {
+  return <div>Loading products...</div>;
+}
+```
+
+**Suspense Boundaries:**
+
+```typescript
+// app/products/page.tsx
+import { Suspense } from "react";
+import { ProductList } from "./_components/ProductList";
+
+export default function ProductsPage() {
+  return (
+    <div>
+      <h1>Products</h1>
+      <Suspense fallback={<ProductListSkeleton />}>
+        <ProductList />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### Loading Best Practices
+
+- **Always show loading states** for async operations
+- **Use skeletons** instead of spinners for better UX
+- **Provide context** in loading messages
+- **Handle partial loading** when possible
+- **Use Suspense** for granular loading states
+
+**Example Skeleton:**
+
+```typescript
+// features/products/_components/ProductCardSkeleton.tsx
+export function ProductCardSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    </div>
+  );
+}
+```
+
+## 7. Error Handling
+
+### Using `error.tsx` Files
+
+**Route-level error boundary:**
+
+```typescript
+// app/products/error.tsx
+"use client";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <h2>Something went wrong!</h2>
+      <p>{error.message}</p>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+```
+
+### Error Handling Best Practices
+
+- **Always provide error boundaries** at appropriate levels
+- **Show user-friendly error messages** (don't expose technical details)
+- **Provide recovery options** (retry, go back, contact support)
+- **Log errors** for debugging (server-side)
+- **Handle different error types** appropriately
+
+**Example Error Handling:**
+
+```typescript
+// lib/utils.ts (shared utility)
+export function handleError(error: unknown) {
+  if (error instanceof Error) {
+    // Log to error tracking service
+    console.error("Error:", error.message);
+    return { message: "Something went wrong. Please try again." };
+  }
+  return { message: "An unexpected error occurred." };
+}
+
+// In Server Action (feature-specific)
+// features/users/_actions/user-actions.ts
+("use server");
+
+import { handleError } from "@/lib/utils";
+
+export async function createUser(formData: FormData) {
+  try {
+    // ... operation
+  } catch (error) {
+    return {
+      success: false,
+      error: handleError(error),
+    };
+  }
+}
+```
+
+## 8. Data Fetching Patterns
+
+### Server Components (Recommended)
+
+```typescript
+// app/products/page.tsx
+async function getProducts() {
+  const res = await fetch("https://api.example.com/products", {
+    cache: "no-store", // or 'force-cache', or { revalidate: 3600 }
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  return res.json();
+}
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return <ProductList products={products} />;
+}
+```
+
+### Server Actions for Mutations
+
+```typescript
+// features/products/_actions/product-actions.ts
+"use server";
+
+import { z } from "zod";
+import { createProductSchema } from "@/features/products/_schemas/product-schema";
+import { revalidatePath } from "next/cache";
+
+export async function createProduct(formData: FormData) {
+  const rawData = {
+    name: formData.get("name"),
+    price: formData.get("price"),
+    description: formData.get("description"),
+  };
+
+  // Validate with Zod
+  const result = createProductSchema.safeParse(rawData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors.map((e) => e.message).join(", "),
+    };
+  }
+
+  const { name, price, description } = result.data;
+
+  // Save to database
+  // ...
+
+  revalidatePath("/products");
+  return { success: true };
+}
+```
+
+### Client-Side Data Fetching (When Needed)
+
+```typescript
+// features/products/_hooks/useProducts.ts
+"use client";
+
+import { useEffect, useState } from "react";
+import type { Product } from "@/features/products/_types/product";
+
+export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err);
+        setLoading(false);
+      });
+  }, []);
+
+  return { products, loading, error };
+}
+```
+
+## 9. TypeScript Best Practices
+
+### Type Definitions
+
+**Feature Types** (`features/[feature]/_types/`):
+
+```typescript
+// features/products/_types/product.ts
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  imageUrl?: string;
+}
+
+export type ProductStatus = "active" | "inactive" | "draft";
+```
+
+**Component Props:**
+
+```typescript
+// features/products/_components/ProductCard.tsx
+import type { Product } from "@/features/products/_types/product";
+
+// Always type component props
+interface ProductCardProps {
+  product: Product;
+  onAddToCart?: (id: string) => void;
+}
+
+export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  // ...
+}
+```
+
+### Type Safety with Server Actions
+
+```typescript
+// features/users/_actions/user-actions.ts
+"use server";
+
+export async function createUser(
+  formData: FormData
+): Promise<
+  { success: true; userId: string } | { success: false; error: string }
+> {
+  // Type-safe return
+}
+```
+
+## 10. File Naming Conventions
+
+### Naming Rules
+
+- **Components**: PascalCase (`Button.tsx`, `ProductCard.tsx`)
+- **Utilities**: camelCase (`formatDate.ts`, `parseFormData.ts`)
+- **Zod Schemas**: kebab-case (`user-schema.ts`, `product-schema.ts`) - in `features/[feature]/_schemas/`
+- **Server Actions**: kebab-case (`user-actions.ts`, `product-actions.ts`) - in `features/[feature]/_actions/`
+- **Hooks**: camelCase with `use` prefix (`useAuth.ts`, `useProducts.ts`) - in `features/[feature]/_hooks/`
+- **Types**: kebab-case or camelCase (`user.ts`, `product-types.ts`) - in `features/[feature]/_types/`
+- **Routes**: lowercase with hyphens (`user-profile`, `product-details`)
+
+### Special Next.js Files
+
+- `page.tsx` - Route page
+- `layout.tsx` - Route layout
+- `loading.tsx` - Loading UI
+- `error.tsx` - Error boundary
+- `not-found.tsx` - 404 page
+- `template.tsx` - Route template
+- `route.ts` - API route handler
+
+## 11. Import Organization
+
+### Import Order
+
+```typescript
+// 1. React and Next.js
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+// 2. Third-party libraries
+import { z } from "zod";
+import { format } from "date-fns";
+
+// 3. Shared utilities (truly global)
+import { formatDate } from "@/lib/utils";
+
+// 4. Feature imports
+import { Button } from "@/components/ui/Button";
+import { UserCard } from "@/features/users/_components/UserCard";
+import type { User } from "@/features/users/_types/user";
+
+// 5. Relative imports
+import { UserActions } from "./_components/UserActions";
+```
+
+### Path Aliases
+
+**Configure in `tsconfig.json`:**
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/features/*": ["./features/*"]
+    }
+  }
+}
+```
+
+## 12. Performance Best Practices
+
+### Optimization Strategies
+
+1. **Use Server Components** to reduce client bundle size
+2. **Implement code splitting** with dynamic imports
+3. **Optimize images** using `next/image`
+4. **Use caching strategies** appropriately
+5. **Minimize client-side JavaScript** when possible
+
+**Example Dynamic Import:**
+
+```typescript
+import dynamic from "next/dynamic";
+
+const HeavyComponent = dynamic(() => import("./HeavyComponent"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false, // Only load on client if needed
+});
+```
+
+### Caching Best Practices
+
+**Next.js Caching Options:**
+
+1. **Static Generation with Revalidation** (Recommended for most cases):
+
+```typescript
+// Revalidate every hour
+fetch(url, { next: { revalidate: 3600 } });
+
+// Revalidate on-demand (using revalidatePath or revalidateTag)
+fetch(url, { next: { tags: ["products"] } });
+```
+
+2. **Force Cache** (For static content that rarely changes):
+
+```typescript
+fetch(url, { cache: "force-cache" });
+```
+
+3. **No Cache** (For always-fresh data):
+
+```typescript
+fetch(url, { cache: "no-store" });
+```
+
+4. **Time-Based Revalidation** (ISR - Incremental Static Regeneration):
+
+```typescript
+// In page.tsx or layout.tsx
+export const revalidate = 3600; // Revalidate every hour
+```
+
+**Caching Strategy Guidelines:**
+
+- **Static content** (blog posts, product pages): Use `force-cache` or long revalidation times
+- **Dynamic content** (user dashboards, real-time data): Use `no-store` or short revalidation
+- **Semi-static content** (product listings, user profiles): Use time-based revalidation (1-24 hours)
+- **Database queries**: Use Prisma query caching or Next.js cache with appropriate revalidation
+- **API responses**: Cache external API calls with appropriate TTL based on data freshness needs
+
+**Cache Invalidation:**
+
+```typescript
+// In Server Actions after mutations
+import { revalidatePath, revalidateTag } from "next/cache";
+
+("use server");
+export async function updateProduct(id: string, data: FormData) {
+  // ... update database
+
+  // Revalidate specific path
+  revalidatePath("/products");
+  revalidatePath(`/products/${id}`);
+
+  // Or revalidate by tag
+  revalidateTag("products");
+}
+```
+
+**Best Practices:**
+
+- ✅ Use appropriate cache strategies based on data freshness requirements
+- ✅ Revalidate caches after mutations (create, update, delete operations)
+- ✅ Use cache tags for granular cache invalidation
+- ✅ Consider user-specific vs public data when caching
+- ✅ Monitor cache hit rates and adjust strategies accordingly
+- ❌ Don't cache sensitive or user-specific data inappropriately
+- ❌ Don't forget to revalidate after database mutations
+
+## 13. Security Best Practices
+
+### Server Actions Security
+
+- **Validate all inputs** on the server using Zod schemas
+- **Sanitize user data** before processing
+- **Use environment variables** for secrets (never expose in client code)
+- **Implement rate limiting** for sensitive operations
+- **Use CSRF protection** (built into Server Actions)
+
+### API Security
+
+- **Validate request data** in API routes using Zod schemas
+- **Use authentication middleware** for protected routes
+- **Implement CORS** properly for public APIs
+- **Rate limit** API endpoints
+- **Sanitize outputs** before returning
+
+## 14. Zod Validation Best Practices
+
+### Why Zod
+
+- **Type-safe validation**: Zod schemas provide TypeScript types automatically
+- **Runtime validation**: Validates data at runtime, catching errors early
+- **Great DX**: Excellent error messages and developer experience
+- **Composable**: Schemas can be composed and extended
+- **Works everywhere**: Server Actions, API Routes, forms, and client-side
+
+### Zod Schema Organization
+
+**Create schemas in `features/[feature]/_schemas/`:**
+
+```typescript
+// features/users/_schemas/user-schema.ts
+import { z } from "zod";
+
+export const userSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  age: z.number().int().min(0).max(120).optional(),
+  createdAt: z.date().optional(),
+});
+
+export type User = z.infer<typeof userSchema>;
+
+// Derived schemas for specific use cases
+export const createUserSchema = userSchema.omit({ id: true, createdAt: true });
+export const updateUserSchema = userSchema.partial().required({ id: true });
+```
+
+### Using Zod in Server Actions
+
+**Always validate with Zod in Server Actions:**
+
+```typescript
+// features/users/_actions/user-actions.ts
+"use server";
+
+import { z } from "zod";
+import { createUserSchema } from "@/features/users/_schemas/user-schema";
+
+export async function createUser(formData: FormData) {
+  // Extract form data
+  const rawData = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    age: formData.get("age") ? Number(formData.get("age")) : undefined,
+  };
+
+  // Validate with Zod
+  const result = createUserSchema.safeParse(rawData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join(", "),
+      fieldErrors: result.error.flatten().fieldErrors,
+    };
+  }
+
+  // Type-safe data after validation
+  const { name, email, age } = result.data;
+
+  // Proceed with database operation
+  // ...
+
+  return { success: true, userId: newUser.id };
+}
+```
+
+### Using Zod in Forms (Client-Side)
+
+**Validate forms on the client before submission:**
+
+```typescript
+// app/contact/_components/ContactForm.tsx
+"use client";
+
+import { useFormState, useFormStatus } from "react-dom";
+import { z } from "zod";
+import { contactSchema } from "@/features/contact/_schemas/contact-schema";
+import { submitContact } from "@/features/contact/_actions/contact-actions";
+
+export function ContactForm() {
+  const [state, formAction] = useFormState(submitContact, null);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  async function handleSubmit(formData: FormData) {
+    // Client-side validation
+    const rawData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+    };
+
+    const result = contactSchema.safeParse(rawData);
+
+    if (!result.success) {
+      // Show client-side errors
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        const path = error.path[0] as string;
+        fieldErrors[path] = error.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    // Clear errors and submit
+    setErrors({});
+    formAction(formData);
+  }
+
+  return (
+    <form action={handleSubmit}>
+      <input name="name" />
+      {errors.name && <span>{errors.name}</span>}
+
+      <input name="email" type="email" />
+      {errors.email && <span>{errors.email}</span>}
+
+      <textarea name="message" />
+      {errors.message && <span>{errors.message}</span>}
+
+      <button type="submit">Submit</button>
+      {state?.error && <p>{state.error}</p>}
+    </form>
+  );
+}
+```
+
+### Using Zod in API Routes
+
+**Validate request bodies in API Routes:**
+
+```typescript
+// app/api/users/route.ts
+import { z } from "zod";
+import { createUserSchema } from "@/features/users/_schemas/user-schema";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+
+    // Validate with Zod
+    const result = createUserSchema.safeParse(body);
+
+    if (!result.success) {
+      return Response.json(
+        {
+          error: "Validation failed",
+          details: result.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Type-safe validated data
+    const userData = result.data;
+
+    // Process request
+    // ...
+
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json({ error: "Invalid request" }, { status: 400 });
+  }
+}
+```
+
+### Zod Schema Best Practices
+
+**DO:**
+
+- ✅ Create schemas in `features/[feature]/_schemas/` (colocated with feature)
+- ✅ Use `z.infer<>` to derive TypeScript types from schemas
+- ✅ Compose schemas using `.pick()`, `.omit()`, `.partial()`, `.extend()`
+- ✅ Provide clear error messages in schema definitions
+- ✅ Use `.safeParse()` for error handling (don't throw)
+- ✅ Validate both client-side and server-side
+- ✅ Export types alongside schemas for reuse
+- ✅ Keep schemas with their feature (don't put in global lib/)
+
+**DON'T:**
+
+- ❌ Don't skip server-side validation (even if client validates)
+- ❌ Don't use `.parse()` in production (use `.safeParse()`)
+- ❌ Don't duplicate validation logic (reuse schemas)
+- ❌ Don't forget to validate FormData (extract and validate)
+- ❌ Don't expose internal validation errors to users (sanitize messages)
+
+### Common Zod Patterns
+
+**FormData Validation:**
+
+```typescript
+// Helper function in feature's _lib folder
+// features/users/_lib/form-utils.ts
+import { z } from "zod";
+
+export function parseFormData<T>(formData: FormData, schema: z.ZodSchema<T>) {
+  const data = Object.fromEntries(formData.entries());
+  return schema.safeParse(data);
+}
+
+// Usage in Server Action
+// features/users/_actions/user-actions.ts
+import { parseFormData } from "@/features/users/_lib/form-utils";
+import { createUserSchema } from "@/features/users/_schemas/user-schema";
+
+const result = parseFormData(formData, createUserSchema);
+```
+
+**Composing Schemas:**
+
+```typescript
+// Base schema
+const baseUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+// Extended schema
+const adminUserSchema = baseUserSchema.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
+});
+
+// Partial for updates
+const updateUserSchema = baseUserSchema.partial();
+```
+
+**Custom Validation:**
+
+```typescript
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain an uppercase letter")
+  .regex(/[a-z]/, "Password must contain a lowercase letter")
+  .regex(/[0-9]/, "Password must contain a number");
+```
+
+**Refining Schemas:**
+
+```typescript
+const userSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+```
+
+### Zod Integration with Prisma
+
+**Generate Zod schemas from Prisma models (optional):**
+
+```typescript
+// features/users/_schemas/user-schema.ts
+import { z } from "zod";
+import { User } from "@prisma/client";
+
+// Create Zod schema from Prisma type (colocated with feature)
+export const userSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+}) satisfies z.ZodType<User>;
+
+// Or use zod-prisma for automatic generation
+// Keep schemas in feature folders, not global lib/
+```
+
+## 15. Testing Best Practices
+
+### Testing Philosophy
+
+- **Test behavior, not implementation**: Focus on what users see and do
+- **Test Server and Client Components separately**: They have different testing requirements
+- **Test user interactions**: Ensure components respond correctly to user actions
+- **Test error and loading states**: Critical for good UX
+- **Mock external dependencies**: Database, APIs, Server Actions
+
+### Testing Server Components
+
+**Server Components should be tested for:**
+
+- Data fetching and rendering
+- Error handling
+- Loading states
+- Server-side logic
+
+**Example Server Component Test:**
+
+```typescript
+// app/products/page.test.tsx
+import { render } from "@testing-library/react";
+import ProductsPage from "./page";
+import { fetchProducts } from "@/services/products";
+
+jest.mock("@/services/products");
+
+describe("ProductsPage", () => {
+  it("renders products correctly", async () => {
+    const mockProducts = [{ id: "1", name: "Product 1" }];
+    (fetchProducts as jest.Mock).mockResolvedValue(mockProducts);
+
+    const result = await render(<ProductsPage />);
+
+    expect(result.getByText("Product 1")).toBeInTheDocument();
+  });
+
+  it("handles errors gracefully", async () => {
+    (fetchProducts as jest.Mock).mockRejectedValue(new Error("Failed"));
+
+    const result = await render(<ProductsPage />);
+
+    expect(result.getByText(/error/i)).toBeInTheDocument();
+  });
+});
+```
+
+### Testing Client Components
+
+**Client Components should be tested for:**
+
+- User interactions (clicks, form submissions)
+- State management
+- Event handlers
+- Client-side logic
+
+**Example Client Component Test:**
+
+```typescript
+// features/products/_components/ProductCard.test.tsx
+import { render, screen, fireEvent } from "@testing-library/react";
+import { ProductCard } from "./ProductCard";
+import { addToCart } from "@/features/products/_actions/cart-actions";
+
+jest.mock("@/features/products/_actions/cart-actions");
+
+describe("ProductCard", () => {
+  it("calls addToCart when button is clicked", async () => {
+    const product = { id: "1", name: "Product 1" };
+    render(<ProductCard product={product} />);
+
+    const button = screen.getByText("Add to Cart");
+    fireEvent.click(button);
+
+    expect(addToCart).toHaveBeenCalledWith("1");
+  });
+
+  it("shows loading state during add to cart", async () => {
+    // Test loading state
+  });
+});
+```
+
+### Testing Server Actions
+
+**Server Actions should be tested for:**
+
+- Input validation
+- Database operations (mocked)
+- Error handling
+- Return values
+
+**Example Server Action Test:**
+
+```typescript
+// features/users/_actions/user-actions.test.ts
+import { createUser } from "./user-actions";
+import { prisma } from "@/lib/prisma";
+
+jest.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      create: jest.fn(),
+    },
+  },
+}));
+
+describe("createUser", () => {
+  it("creates user with valid data", async () => {
+    const formData = new FormData();
+    formData.append("name", "John Doe");
+    formData.append("email", "john@example.com");
+
+    const result = await createUser(formData);
+
+    expect(result.success).toBe(true);
+    expect(prisma.user.create).toHaveBeenCalled();
+  });
+
+  it("returns error for invalid data", async () => {
+    const formData = new FormData();
+
+    const result = await createUser(formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+});
+```
+
+### Testing Structure
+
+**Colocated Tests (Recommended):**
+
+```
+app/
+  products/
+    page.tsx
+    page.test.tsx        # Colocated test
+    _components/
+      ProductList.tsx
+      ProductList.test.tsx
+```
+
+**Or Separate Test Directory:**
+
+```
+__tests__/
+  app/
+    products/
+      page.test.tsx
+```
+
+### Testing Tools and Setup
+
+**Recommended Testing Stack:**
+
+- **Jest**: Test runner and assertion library
+- **React Testing Library**: Component testing
+- **@testing-library/user-event**: User interaction simulation
+- **MSW (Mock Service Worker)**: API mocking
+- **@testing-library/jest-dom**: Additional matchers
+
+**Test Setup Example:**
+
+```typescript
+// jest.setup.ts
+import "@testing-library/jest-dom";
+import { server } from "./mocks/server";
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+### Testing Best Practices
+
+**DO:**
+
+- ✅ Test user-facing behavior, not implementation details
+- ✅ Use descriptive test names that explain what is being tested
+- ✅ Test error and edge cases
+- ✅ Mock external dependencies (database, APIs, Server Actions)
+- ✅ Keep tests isolated and independent
+- ✅ Test loading and error states
+- ✅ Use React Testing Library's best practices (queries, user events)
+
+**DON'T:**
+
+- ❌ Test implementation details (internal state, methods)
+- ❌ Test third-party library functionality
+- ❌ Write tests that are too coupled to implementation
+- ❌ Skip testing error cases
+- ❌ Test multiple things in one test
+- ❌ Use `getByTestId` as first choice (prefer accessible queries)
+
+### Test Coverage Goals
+
+- **Minimum**: 70% code coverage
+- **Target**: 80%+ code coverage
+- **Critical paths**: 100% coverage (authentication, payments, data mutations)
+- **New features**: Must include tests before merging
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- path/to/test.file.tsx
+```
+
+## 16. Prisma and Database Best Practices
+
+### Prisma Setup
+
+**Prisma Client Instance:**
+
+```typescript
+// lib/prisma.ts
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+```
+
+**Why this pattern?**
+
+- Prevents multiple Prisma Client instances in development (hot reload)
+- Ensures single instance across the application
+- Properly handles Next.js development mode
+
+### Database Migrations (CRITICAL)
+
+**⚠️ ALWAYS use migrations for database schema changes:**
+
+**When making ANY database changes:**
+
+1. **Modify the Prisma schema** (`prisma/schema.prisma`)
+2. **Create a migration** using Prisma CLI
+3. **Review the migration** before applying
+4. **Apply the migration** to your database
+5. **Commit both** schema and migration files to version control
+
+**Migration Workflow:**
+
+```bash
+# 1. Make changes to prisma/schema.prisma
+# Example: Add a new field to User model
+
+# 2. Create migration
+npx prisma migrate dev --name add_user_bio
+
+# 3. Review the generated migration file in prisma/migrations/
+# 4. Migration is automatically applied in development
+
+# 5. For production, use:
+npx prisma migrate deploy
+```
+
+**Migration Best Practices:**
+
+- ✅ **Always create migrations** for schema changes (never edit database directly)
+- ✅ **Use descriptive migration names**: `add_user_bio`, `create_product_table`
+- ✅ **Review migration SQL** before applying in production
+- ✅ **Test migrations** in development/staging first
+- ✅ **Backup database** before running migrations in production
+- ✅ **Commit migration files** to version control
+- ✅ **Use `migrate deploy`** in production (not `migrate dev`)
+- ❌ **Never skip migrations** or edit database manually
+- ❌ **Never delete migration files** that have been applied
+- ❌ **Never run `prisma db push`** in production (use migrations)
+
+**Example Migration Workflow:**
+
+```bash
+# Step 1: Update schema
+# prisma/schema.prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  bio       String?  // NEW FIELD
+  createdAt DateTime @default(now())
+}
+
+# Step 2: Create and apply migration
+npx prisma migrate dev --name add_user_bio
+
+# This will:
+# - Create migration file in prisma/migrations/YYYYMMDDHHMMSS_add_user_bio/
+# - Apply the migration to your database
+# - Regenerate Prisma Client
+
+# Step 3: Use in code
+import { prisma } from '@/lib/prisma'
+
+const user = await prisma.user.create({
+  data: {
+    email: 'user@example.com',
+    name: 'John Doe',
+    bio: 'Software developer', // New field available
+  },
+})
+```
+
+### Using Prisma in Server Actions
+
+**Prefer Server Actions for database operations:**
+
+```typescript
+// features/users/_actions/user-actions.ts
+"use server";
+
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { createUserSchema } from "@/features/users/_schemas/user-schema";
+
+export async function createUser(formData: FormData) {
+  const rawData = {
+    email: formData.get("email"),
+    name: formData.get("name"),
+  };
+
+  // Validate input with Zod
+  const result = createUserSchema.safeParse(rawData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors.map((e) => e.message).join(", "),
+      fieldErrors: result.error.flatten().fieldErrors,
+    };
+  }
+
+  const { email, name } = result.data;
+
+  try {
+    // Database operation
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+      },
+    });
+
+    // Revalidate relevant paths
+    revalidatePath("/users");
+
+    return { success: true, userId: user.id };
+  } catch (error) {
+    // Handle Prisma errors
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: "Failed to create user" };
+  }
+}
+```
+
+### Prisma Query Best Practices
+
+**Efficient Queries:**
+
+```typescript
+// ✅ GOOD: Select only needed fields
+const users = await prisma.user.findMany({
+  select: {
+    id: true,
+    email: true,
+    name: true,
+    // Don't select unnecessary fields
+  },
+});
+
+// ✅ GOOD: Use include for relations
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  include: {
+    posts: {
+      select: {
+        id: true,
+        title: true,
+      },
+    },
+  },
+});
+
+// ✅ GOOD: Use pagination
+const users = await prisma.user.findMany({
+  skip: (page - 1) * pageSize,
+  take: pageSize,
+  orderBy: { createdAt: "desc" },
+});
+
+// ❌ BAD: Selecting all fields unnecessarily
+const users = await prisma.user.findMany(); // Selects everything
+
+// ❌ BAD: N+1 queries
+for (const user of users) {
+  const posts = await prisma.post.findMany({ where: { userId: user.id } });
+}
+```
+
+### Database Connection Management
+
+**Connection Pooling:**
+
+- Prisma Client manages connection pooling automatically
+- Use a single Prisma Client instance (via `lib/prisma.ts`)
+- Don't create multiple Prisma Client instances
+- Connection pool size can be configured in `DATABASE_URL`
+
+**Environment Variables:**
+
+```env
+# .env.local
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb?connection_limit=10&pool_timeout=20"
+```
+
+### Prisma in Server Components
+
+```typescript
+// app/users/page.tsx
+import { prisma } from "@/lib/prisma";
+import { UserList } from "@/features/users/_components/UserList";
+
+export default async function UsersPage() {
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  });
+
+  return (
+    <div>
+      <h1>Users</h1>
+      <UserList users={users} />
+    </div>
+  );
+}
+```
+
+### Error Handling with Prisma
+
+```typescript
+import { Prisma } from "@prisma/client";
+
+try {
+  const user = await prisma.user.create({ data });
+} catch (error) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      // Unique constraint violation
+      return { error: "Email already exists" };
+    }
+  }
+  throw error;
+}
+```
+
+### Database Migration Checklist
+
+**Before making database changes:**
+
+- [ ] Update `prisma/schema.prisma`
+- [ ] Create migration: `npx prisma migrate dev --name descriptive_name`
+- [ ] Review generated migration SQL
+- [ ] Test migration in development
+- [ ] Commit both schema and migration files
+- [ ] Apply migration to staging: `npx prisma migrate deploy`
+- [ ] Test application with new schema
+- [ ] Apply migration to production: `npx prisma migrate deploy`
+- [ ] Monitor for any issues
+
+**Remember**:
+
+- ⚠️ **NEVER** edit the database directly without migrations
+- ⚠️ **ALWAYS** use migrations for schema changes
+- ⚠️ **ALWAYS** test migrations in development/staging first
+- ⚠️ **ALWAYS** backup production database before migrations
+
+## 17. Common Patterns and Examples
+
+### Form with Server Action
+
+```typescript
+// app/contact/page.tsx
+import { ContactForm } from "@/features/contact/_components/ContactForm";
+
+export default function ContactPage() {
+  return (
+    <div>
+      <h1>Contact Us</h1>
+      <ContactForm />
+    </div>
+  );
+}
+
+// features/contact/_components/ContactForm.tsx
+("use client");
+
+import { useFormState } from "react-dom";
+import { submitContact } from "@/features/contact/_actions/contact-actions";
+
+export function ContactForm() {
+  const [state, formAction] = useFormState(submitContact, null);
+
+  return (
+    <form action={formAction}>
+      <input name="name" required />
+      <input name="email" type="email" required />
+      <button type="submit">Submit</button>
+      {state?.error && <p>{state.error}</p>}
+    </form>
+  );
+}
+
+// features/contact/_actions/contact-actions.ts
+("use server");
+
+import { z } from "zod";
+import { contactSchema } from "@/features/contact/_schemas/contact-schema";
+
+export async function submitContact(prevState: any, formData: FormData) {
+  const rawData = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    message: formData.get("message"),
+  };
+
+  // Validate with Zod
+  const result = contactSchema.safeParse(rawData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors.map((e) => e.message).join(", "),
+      fieldErrors: result.error.flatten().fieldErrors,
+    };
+  }
+
+  const { name, email, message } = result.data;
+
+  // Process contact submission
+  // ...
+
+  return { success: true };
+}
+```
+
+### Data Fetching with Loading and Error
+
+```typescript
+// app/products/page.tsx
+import { Suspense } from "react";
+import { ProductList } from "./_components/ProductList";
+import { ProductListSkeleton } from "@/features/products/_components/ProductListSkeleton";
+
+export default function ProductsPage() {
+  return (
+    <div>
+      <h1>Products</h1>
+      <Suspense fallback={<ProductListSkeleton />}>
+        <ProductList />
+      </Suspense>
+    </div>
+  );
+}
+
+// app/products/_components/ProductList.tsx
+import { fetchProducts } from "@/features/products/_lib/product-service";
+import { ProductCard } from "@/features/products/_components/ProductCard";
+
+export async function ProductList() {
+  const products = await fetchProducts();
+
+  if (products.length === 0) {
+    return <p>No products found.</p>;
+  }
+
+  return (
+    <div className="grid">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+```
+
+## 18. Quick Reference Checklist
+
+### Before Creating a Component
+
+- [ ] Is this a Server or Client Component?
+- [ ] Can this be a Server Component? (prefer Server Components)
+- [ ] Is this component feature-specific? (place in `features/[feature]/_components/`)
+- [ ] Is this a shared UI component? (place in `components/ui/`)
+- [ ] Are props properly typed?
+- [ ] Is error handling implemented?
+- [ ] Is loading state handled?
+
+### Before Creating a Route
+
+- [ ] Is this a Server Action or API Route? (prefer Server Actions)
+- [ ] Is the route structure clear?
+- [ ] Are loading and error states defined?
+- [ ] Is data fetching optimized?
+- [ ] Are components properly separated?
+- [ ] Is caching strategy appropriate?
+- [ ] Is Zod schema defined in the feature's `_schemas/` folder?
+
+### Before Database Changes
+
+- [ ] Have I updated `prisma/schema.prisma`?
+- [ ] Have I created a migration? (`npx prisma migrate dev --name ...`)
+- [ ] Have I reviewed the migration SQL?
+- [ ] Have I tested the migration in development?
+- [ ] Have I committed both schema and migration files?
+- [ ] Am I using Server Actions for database operations? (not API routes)
+
+### Code Quality
+
+- [ ] Code is separated into components (not all in page)
+- [ ] Server Components used by default
+- [ ] Client Components only when necessary
+- [ ] Proper error handling
+- [ ] Loading states provided
+- [ ] TypeScript types defined
+- [ ] Code follows naming conventions
+- [ ] Zod schemas used for all validation (colocated in feature folders)
+- [ ] Feature code is properly organized (actions, components, hooks, schemas, types in feature folder)
+- [ ] Tests written for new features
+- [ ] Caching strategy implemented appropriately
+- [ ] Database operations use migrations (not direct edits)
+
+---
+
+**Remember**:
+
+- The goal is to build maintainable, performant Next.js applications by leveraging Server Components, Server Actions, and proper code organization.
+- Always prefer server-side rendering and Server Actions over client-side alternatives when possible.
+- Use API Routes ONLY for public endpoints consumed by external services.
+- Always use Zod schemas for validation in Server Actions, API Routes, and forms.
+- Use feature-based organization: all feature code (actions, components, hooks, schemas, types) should be colocated in `features/[feature]/` folders.
+- Only truly shared code (like Prisma client, base UI components) should be in global folders.
+- Always use Prisma migrations for database schema changes - never edit the database directly.
+- Implement appropriate caching strategies based on data freshness requirements.
+- Write tests for all new features, focusing on user-facing behavior.
