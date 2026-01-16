@@ -6,25 +6,117 @@ alwaysApply: true
 
 # GitHub Flow Best Practices
 
-## ⚠️ CRITICAL: Branch Check Requirement
+## 🎯 Quick Reference: The Golden Rule
 
-**BEFORE making ANY changes, you MUST:**
+**FOR EVERY FEATURE/TASK:**
+1. ✅ Pull from master: `git checkout master && git pull origin master`
+2. ✅ Create NEW branch: `git checkout -b feature/name master`
+3. ✅ Work on feature
+4. ✅ Sync with master before PR: `git merge origin/master`
+5. ✅ Create PR to master
+6. ✅ Merge to master after approval
+7. ✅ Delete branch after merge
 
-1. **Check current branch**: Run `git branch --show-current` or `git status`
-2. **If on `master` or `main`**: 
-   - **STOP immediately**
-   - Create a feature branch: `git checkout -b feature/description` or `git checkout -b chore/task-name`
-   - **NEVER commit directly to `master` or `main`**
-3. **Verify you're on a feature branch** before making any changes
-4. **All commits must be on feature branches**, never on `master`/`main`
+**NEVER:**
+- ❌ Work on existing feature branches
+- ❌ Branch from another feature branch
+- ❌ Commit to master/main
+- ❌ Skip syncing with master before PR
+- ❌ Force push to master
 
-**Branch naming examples:**
-- `feature/user-authentication`
-- `bugfix/login-error`
-- `chore/update-dependencies`
-- `docs/api-documentation`
+## ⚠️ CRITICAL: Mandatory Git Workflow for ALL Features/Tasks
 
-**This is MANDATORY for all agents and all work.**
+**FOR EVERY SINGLE FEATURE OR TASK, YOU MUST FOLLOW THIS EXACT WORKFLOW:**
+
+### Step-by-Step Mandatory Process
+
+**STEP 1: Always Start from Master**
+```bash
+# 1. Check current branch
+git branch --show-current
+
+# 2. If NOT on master/main, switch to it
+git checkout master
+# OR
+git checkout main
+
+# 3. Pull latest code from remote master
+git pull origin master
+# OR
+git pull origin main
+
+# 4. Verify you're up to date
+git status
+```
+
+**STEP 2: Create New Branch from Master**
+```bash
+# Create and switch to new feature branch FROM master
+git checkout -b feature/feature-name master
+# OR
+git checkout -b feature/feature-name main
+
+# Verify you're on the new branch
+git branch --show-current
+```
+
+**STEP 3: Work on Feature**
+- Make your changes
+- Commit frequently with clear messages
+- Test your changes
+- Run linting and build checks
+
+**STEP 4: Before Creating PR**
+```bash
+# Ensure branch is up to date with master
+git fetch origin
+git merge origin/master
+# OR
+git merge origin/main
+
+# Run quality checks
+npm run lint
+npx tsc --noEmit
+npm run build
+npm test
+
+# Push your branch
+git push -u origin feature/feature-name
+```
+
+**STEP 5: Create Pull Request**
+- Create PR from feature branch to master/main
+- Wait for review and approval
+- Merge to master/main after approval
+
+**STEP 6: Clean Up**
+```bash
+# After merge, delete local branch
+git checkout master
+git pull origin master
+git branch -d feature/feature-name
+```
+
+### ⚠️ CRITICAL RULES
+
+1. **NEVER start work on an existing feature branch** - Always create a NEW branch from master
+2. **NEVER commit to master/main** - All commits must be on feature branches
+3. **ALWAYS pull from master first** - Before creating any branch, ensure master is up to date
+4. **ALWAYS create branch from master** - Never branch from another feature branch
+5. **ALWAYS sync with master before PR** - Merge master into your branch before creating PR
+
+### What to Do If You See Conflicts
+
+If you encounter conflicts:
+1. **STOP immediately**
+2. **Do NOT force push or skip conflicts**
+3. **Ensure master is up to date**: `git checkout master && git pull origin master`
+4. **Rebase your branch**: `git checkout feature/your-branch && git rebase master`
+5. **Resolve conflicts carefully**
+6. **Test after resolving conflicts**
+7. **Continue with PR process**
+
+**This workflow is MANDATORY and prevents conflicts by ensuring all work starts from the latest master branch.**
 
 ## 1. GitHub Flow Overview
 
@@ -723,20 +815,77 @@ feat: changes
 
 ## 10. Common Workflows
 
-### Feature Development Workflow
+### Feature Development Workflow (MANDATORY PROCESS)
 
-1. **Create branch**: `git checkout -b feature/feature-name`
-2. **Make changes**: Implement the feature
-3. **Commit frequently**: Small, logical commits
-4. **Push branch**: `git push origin feature/feature-name`
-5. **Create PR**: Create pull request (draft if WIP)
-6. **Update from main**: Regularly sync with main
-7. **Address feedback**: Respond to review comments
-8. **Wait for CI**: Ensure all checks pass
-9. **Get approval**: Wait for required approvals
-10. **Merge**: Merge to main after approval
-11. **Delete branch**: Delete feature branch after merge
-12. **Deploy**: Automatic deployment from main
+**⚠️ FOLLOW THIS EXACT SEQUENCE FOR EVERY FEATURE:**
+
+1. **Pull latest master**: 
+   ```bash
+   git checkout master
+   git pull origin master
+   ```
+
+2. **Create new branch from master**: 
+   ```bash
+   git checkout -b feature/feature-name master
+   ```
+
+3. **Verify branch**: 
+   ```bash
+   git branch --show-current  # Should show feature/feature-name
+   git log --oneline -3  # Should show commits from master
+   ```
+
+4. **Make changes**: Implement the feature
+
+5. **Commit frequently**: Small, logical commits with clear messages
+
+6. **Before pushing, sync with master**:
+   ```bash
+   git fetch origin
+   git merge origin/master
+   # Resolve any conflicts if they occur
+   ```
+
+7. **Run quality checks**:
+   ```bash
+   npm run lint
+   npx tsc --noEmit
+   npm run build
+   npm test
+   ```
+
+8. **Push branch**: 
+   ```bash
+   git push -u origin feature/feature-name
+   ```
+
+9. **Create PR**: Create pull request from feature branch to master
+
+10. **Update from master during PR** (if master has new commits):
+    ```bash
+    git checkout feature/feature-name
+    git fetch origin
+    git merge origin/master
+    git push origin feature/feature-name
+    ```
+
+11. **Address feedback**: Respond to review comments, make changes, push updates
+
+12. **Wait for CI**: Ensure all checks pass
+
+13. **Get approval**: Wait for required approvals
+
+14. **Merge**: Merge to master after approval (via GitHub PR merge)
+
+15. **Clean up**: 
+    ```bash
+    git checkout master
+    git pull origin master
+    git branch -d feature/feature-name
+    ```
+
+16. **Deploy**: Automatic deployment from master
 
 ### Bug Fix Workflow
 
