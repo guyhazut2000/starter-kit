@@ -365,14 +365,44 @@ git push origin feature/feature-name --force-with-lease
    git log --oneline -5  # See recent commits
    ```
 
-3. **Optional: Clean up local feature branch**:
+3. **MANDATORY: Clean up merged branches**:
 
    ```bash
    # Delete the local feature branch (it's already merged)
    git branch -d feature/feature-name
-
+   
    # If branch was force-pushed or has diverged, use -D to force delete
    # git branch -D feature/feature-name
+   
+   # Delete remote branch (if not auto-deleted by GitHub)
+   git push origin --delete feature/feature-name
+   
+   # Clean up stale remote branch references
+   git remote prune origin
+   ```
+
+   **Why delete merged branches?**
+   - ✅ Keeps repository clean and organized
+   - ✅ All commits remain in git history (nothing is lost)
+   - ✅ Can recreate branch from history if needed
+   - ✅ Standard industry best practice
+   - ✅ Makes it clear which branches are active vs merged
+
+   **When to keep temporarily (rare cases):**
+   - Hotfix needed immediately after merge (keep for 1-2 days max)
+   - Related follow-up work planned (delete after follow-up is done)
+   - Uncertain if merge was successful (verify, then delete)
+
+   **Recovering deleted branch (if needed):**
+   ```bash
+   # Find the merge commit
+   git log --oneline --merges
+   
+   # Or find commits by message
+   git log --all --grep="feature name" --oneline
+   
+   # Recreate branch from merge commit
+   git checkout -b feature/feature-name <merge-commit-hash>
    ```
 
 4. **Verify you're ready for next feature**:
@@ -420,7 +450,9 @@ git push origin feature/feature-name --force-with-lease
    ```bash
    git checkout master
    git pull origin master
-   git branch -d feature/new-feature  # cleanup
+   git branch -d feature/new-feature  # Delete local branch
+   git push origin --delete feature/new-feature  # Delete remote branch
+   git remote prune origin  # Clean up stale references
    ```
 
 4. **Start Next Feature**:
@@ -431,6 +463,76 @@ git push origin feature/feature-name --force-with-lease
    ```
 
 **Remember**: Always be up to date with master branch before starting any new work.
+
+### Branch Cleanup Best Practices
+
+**⚠️ MANDATORY: Always delete merged branches**
+
+After a PR is merged, you MUST clean up both local and remote branches:
+
+```bash
+# 1. Switch to master and pull latest
+git checkout master
+git pull origin master
+
+# 2. Delete local branch
+git branch -d feature/feature-name
+
+# 3. Delete remote branch (if not auto-deleted)
+git push origin --delete feature/feature-name
+
+# 4. Clean up stale references
+git remote prune origin
+```
+
+**Why delete merged branches?**
+
+- ✅ **Keeps repository clean**: Only active branches remain visible
+- ✅ **Nothing is lost**: All commits remain in git history forever
+- ✅ **Easy recovery**: Can recreate branch from history if needed
+- ✅ **Best practice**: Standard industry practice for all teams
+- ✅ **Clear active work**: Makes it obvious which branches are in progress
+- ✅ **Prevents confusion**: Avoids working on old merged branches
+
+**What happens when you delete a branch?**
+
+- ✅ All commits remain in git history
+- ✅ You can still see them with `git log`
+- ✅ PR history remains on GitHub
+- ✅ You can recreate the branch from any commit hash
+- ✅ Nothing is permanently lost
+
+**When to keep a branch temporarily (rare exceptions):**
+
+- **Hotfix needed immediately**: Keep for 1-2 days max, then delete
+- **Related follow-up work**: Keep until follow-up is done, then delete
+- **Uncertain merge success**: Verify merge, then delete
+
+**How to recover a deleted branch (if needed):**
+
+```bash
+# Find the merge commit or any commit from that branch
+git log --oneline --merges
+git log --all --grep="feature name" --oneline
+
+# Recreate branch from merge commit
+git checkout -b feature/feature-name <merge-commit-hash>
+
+# Or recreate from any commit in that branch
+git checkout -b feature/feature-name <commit-hash>
+```
+
+**GitHub Auto-Delete Setting (Recommended):**
+
+Enable automatic deletion of merged branches in GitHub:
+
+1. Go to repository **Settings**
+2. Navigate to **General** → **Pull Requests**
+3. Enable **"Automatically delete head branches"**
+
+This will automatically delete remote branches after PR merge, so you only need to delete local branches.
+
+**⚠️ CRITICAL RULE**: **Always delete merged branches. This is not optional - it's a mandatory part of the workflow.**
 
 ### Pushing Changes
 
