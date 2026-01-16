@@ -43,6 +43,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 ### Examples
 
 **Good Commit Messages:**
+
 ```
 feat(products): Add product search functionality
 
@@ -78,6 +79,7 @@ Related to #789
 ```
 
 **Bad Commit Messages:**
+
 ```
 Update code
 ```
@@ -125,6 +127,7 @@ feat: stuff
 ### Examples
 
 **Good Branch Names:**
+
 ```
 feature/user-authentication
 feature/product-search-with-filters
@@ -135,6 +138,7 @@ docs/api-documentation-update
 ```
 
 **Bad Branch Names:**
+
 ```
 feature
 fix
@@ -157,11 +161,13 @@ test
 ### PR Title
 
 Follow commit message format:
+
 ```
 <type>: <short description>
 ```
 
 Examples:
+
 - `feat: Add user authentication with OAuth`
 - `fix: Resolve memory leak in image processing`
 - `docs: Update API documentation for v2`
@@ -170,30 +176,36 @@ Examples:
 
 ```markdown
 ## Description
+
 Brief description of what this PR does and why.
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Related Issues
+
 Closes #123
 Related to #456
 
 ## Changes Made
+
 - Change 1
 - Change 2
 - Change 3
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing performed
 - [ ] All tests pass locally
 
 ## Checklist
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review completed
 - [ ] Comments added for complex code
@@ -206,6 +218,7 @@ Related to #456
 ### PR Requirements
 
 **Before Creating PR:**
+
 - [ ] Branch is up to date with `main`
 - [ ] All tests pass locally
 - [ ] Linting passes
@@ -215,6 +228,7 @@ Related to #456
 - [ ] Related issues are linked
 
 **Before Merging:**
+
 - [ ] At least one approval
 - [ ] All CI checks pass
 - [ ] Branch is up to date
@@ -311,6 +325,7 @@ git push --force-with-lease
 ## Pre-commit Hooks (If Configured)
 
 If using Husky or similar:
+
 - Run linting on staged files
 - Run formatting on staged files
 - Run type checking
@@ -319,17 +334,20 @@ If using Husky or similar:
 ## Merge Strategies
 
 ### Squash and Merge (Recommended)
+
 - Combines all commits into a single commit
 - Cleaner git history
 - Easier to revert if needed
 - Use for feature branches
 
 ### Merge Commit
+
 - Preserves individual commit history
 - Use when commit history is important
 - Creates merge commit in history
 
 ### Rebase and Merge
+
 - Linear history without merge commits
 - Use when you want completely linear history
 - Can be more complex for reviewers
