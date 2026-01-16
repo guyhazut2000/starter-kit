@@ -237,19 +237,47 @@ Related to #456
 
 ## Git Workflow
 
-### Creating a Branch
+### ⚠️ MANDATORY: Creating a Branch (ALWAYS Follow This)
 
-```bash
-# Update main branch
-git checkout main
-git pull origin main
+**FOR EVERY FEATURE OR TASK, YOU MUST:**
 
-# Create and switch to new branch
-git checkout -b feature/feature-name
+1. **Start from master/main**:
+   ```bash
+   # Switch to master/main
+   git checkout master
+   # OR
+   git checkout main
+   
+   # Pull latest code
+   git pull origin master
+   # OR
+   git pull origin main
+   
+   # Verify you're up to date
+   git status
+   ```
 
-# Or in one command
-git checkout -b feature/feature-name main
-```
+2. **Create new branch FROM master/main**:
+   ```bash
+   # Create and switch to new branch from master
+   git checkout -b feature/feature-name master
+   # OR
+   git checkout -b feature/feature-name main
+   
+   # Verify you're on the new branch
+   git branch --show-current
+   ```
+
+3. **NEVER branch from another feature branch** - Always branch from master/main
+
+4. **NEVER start work on an existing feature branch** - Always create a fresh branch from master
+
+### Why This Prevents Conflicts
+
+- Starting from latest master ensures you have all recent changes
+- Creating fresh branches prevents merge conflicts from old branches
+- Syncing with master before PR ensures compatibility
+- Clean branch history makes reviews easier
 
 ### Making Commits
 
@@ -267,18 +295,46 @@ git commit -m "feat(products): Add product search"
 git commit
 ```
 
-### Syncing with Main
+### Syncing with Master/Main (BEFORE Creating PR)
+
+**⚠️ ALWAYS sync with master/main before creating a PR:**
 
 ```bash
-# Fetch latest changes
+# 1. Ensure master/main is up to date
+git checkout master
+git pull origin master
+
+# 2. Switch back to your feature branch
+git checkout feature/feature-name
+
+# 3. Fetch latest changes
 git fetch origin
 
-# Update feature branch from main
-git checkout feature/feature-name
-git merge main
-# or
-git rebase main
+# 4. Merge master into your branch
+git merge origin/master
+# OR
+git merge origin/main
+
+# 5. If conflicts occur, resolve them:
+# - Review conflicted files
+# - Resolve conflicts manually
+# - Test after resolving
+# - Commit the merge
+
+# 6. Push updated branch
+git push origin feature/feature-name
 ```
+
+**Alternative: Rebase (if preferred)**
+```bash
+git checkout feature/feature-name
+git fetch origin
+git rebase origin/master
+# Resolve conflicts if any
+git push origin feature/feature-name --force-with-lease
+```
+
+**⚠️ IMPORTANT**: Always sync with master/main BEFORE creating PR to avoid conflicts.
 
 ### Pushing Changes
 
