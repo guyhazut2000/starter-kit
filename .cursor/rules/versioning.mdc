@@ -1,0 +1,451 @@
+---
+description: Version management strategy using Semantic Versioning (SemVer) with npm and git integration
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Version Management Strategy
+
+## Overview
+
+This project uses **Semantic Versioning (SemVer)** for version management. Version numbers follow the format:
+
+```
+MAJOR.MINOR.PATCH
+```
+
+Examples: `1.0.0`, `1.2.3`, `2.0.0`
+
+## Semantic Versioning Rules
+
+### Version Components
+
+- **MAJOR** (X.0.0): Breaking changes that are incompatible with previous versions
+  - API changes that break backward compatibility
+  - Removing features
+  - Major architectural changes
+  - Database schema changes that require migrations
+
+- **MINOR** (0.X.0): New features that are backward compatible
+  - Adding new features
+  - Adding new API endpoints
+  - Adding new components or utilities
+  - Deprecating features (but not removing them)
+
+- **PATCH** (0.0.X): Bug fixes and small changes that are backward compatible
+  - Bug fixes
+  - Security patches
+  - Performance improvements
+  - Documentation updates
+  - Code refactoring (no behavior change)
+
+### Version Number Format
+
+- **Current Version**: Stored in `package.json` under the `version` field
+- **Version Format**: Must follow SemVer (e.g., `1.2.3`)
+- **Pre-release Versions**: Can use suffixes like `1.2.3-alpha.1`, `1.2.3-beta.1`, `1.2.3-rc.1`
+
+## Version Management Commands
+
+### Manual Version Bumping
+
+Use npm scripts to bump versions:
+
+```bash
+# Bump patch version (1.2.3 -> 1.2.4)
+npm run version:patch
+
+# Bump minor version (1.2.3 -> 1.3.0)
+npm run version:minor
+
+# Bump major version (1.2.3 -> 2.0.0)
+npm run version:major
+```
+
+### What These Commands Do
+
+1. **Update `package.json`**: Bumps the version number
+2. **Create Git Tag**: Creates a version tag (e.g., `v1.2.3`)
+3. **Update CHANGELOG.md**: Adds a new version entry (if configured)
+4. **Commit Changes**: Creates a commit with the version bump
+
+### Pre-release Versions
+
+For pre-release versions (alpha, beta, release candidate):
+
+```bash
+# Create pre-release version
+npm run version:prerelease -- --prerelease=alpha
+npm run version:prerelease -- --prerelease=beta
+npm run version:prerelease -- --prerelease=rc
+```
+
+## Version Bumping Workflow
+
+### When to Bump Versions
+
+**Bump PATCH version when:**
+- Fixing bugs
+- Making small improvements
+- Updating documentation
+- Refactoring code (no behavior change)
+- Security patches
+
+**Bump MINOR version when:**
+- Adding new features
+- Adding new API endpoints
+- Adding new components
+- Deprecating features (but keeping them)
+- Making backward-compatible changes
+
+**Bump MAJOR version when:**
+- Breaking API changes
+- Removing features
+- Major architectural changes
+- Database schema changes requiring migrations
+- Any change that breaks backward compatibility
+
+### Version Bump Process
+
+1. **Complete Your Changes**: Finish all feature work, bug fixes, etc.
+2. **Update CHANGELOG.md**: Document changes in the changelog
+3. **Run Quality Checks**: Ensure linting, tests, and build pass
+4. **Bump Version**: Run appropriate version command
+5. **Review Changes**: Check that version was updated correctly
+6. **Commit and Push**: Commit the version bump and push to remote
+7. **Create Release**: Create a GitHub release (if applicable)
+
+### Example Workflow
+
+```bash
+# 1. Complete feature work
+git add .
+git commit -m "feat(products): Add product search functionality"
+
+# 2. Update CHANGELOG.md manually or it will be auto-updated
+
+# 3. Run quality checks
+npm run lint
+npm test
+npm run build
+
+# 4. Bump version (minor for new feature)
+npm run version:minor
+
+# 5. Review the changes
+git status
+git log -1
+
+# 6. Push changes and tags
+git push origin feature/product-search
+git push origin --tags
+
+# 7. Create PR and merge
+# After merge, the version tag will be available on main
+```
+
+## CHANGELOG.md
+
+### Purpose
+
+The `CHANGELOG.md` file tracks all notable changes to the project. It follows the [Keep a Changelog](https://keepachangelog.com/) format.
+
+### Format
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- New features that are not yet released
+
+### Changed
+- Changes to existing functionality
+
+### Deprecated
+- Features that will be removed in upcoming versions
+
+### Removed
+- Removed features
+
+### Fixed
+- Bug fixes
+
+### Security
+- Security fixes
+
+## [1.2.0] - 2024-01-15
+
+### Added
+- Product search functionality
+- User authentication with OAuth
+
+### Changed
+- Improved error handling in API routes
+
+### Fixed
+- Memory leak in image processing
+
+## [1.1.0] - 2024-01-01
+
+### Added
+- Initial release
+```
+
+### Updating CHANGELOG.md
+
+**Manual Update (Recommended):**
+- Update `CHANGELOG.md` before bumping version
+- Move items from `[Unreleased]` to the new version section
+- Add release date in format `YYYY-MM-DD`
+
+**Automatic Update:**
+- Some tools can auto-generate changelog from git commits
+- Can be configured in version scripts if desired
+
+### CHANGELOG Best Practices
+
+- ✅ Keep entries concise and clear
+- ✅ Group changes by type (Added, Changed, Fixed, etc.)
+- ✅ Use present tense ("Add feature" not "Added feature")
+- ✅ Reference issues/PRs when applicable
+- ✅ Include breaking changes prominently
+- ✅ Update on every version bump
+
+## Git Integration
+
+### Version Tags
+
+Each version bump creates a git tag:
+
+```bash
+# Tags are created automatically with format: v1.2.3
+git tag -l "v*"
+```
+
+### Tag Format
+
+- **Format**: `v{MAJOR}.{MINOR}.{PATCH}`
+- **Examples**: `v1.0.0`, `v1.2.3`, `v2.0.0`
+- **Pre-release**: `v1.2.3-alpha.1`, `v1.2.3-beta.1`
+
+### Pushing Tags
+
+After version bump, push tags to remote:
+
+```bash
+# Push all tags
+git push origin --tags
+
+# Push specific tag
+git push origin v1.2.3
+```
+
+### Version in Commit Messages
+
+Version bumps create commits with messages like:
+
+```
+chore: bump version to 1.2.3
+```
+
+Or with more detail:
+
+```
+chore(release): bump version to 1.2.3
+
+- Add product search feature
+- Fix memory leak in image processing
+- Update dependencies
+```
+
+## Conventional Commits and Versioning
+
+### Mapping Commit Types to Version Bumps
+
+The project uses Conventional Commits. Here's how commit types map to version bumps:
+
+| Commit Type | Version Bump | Example |
+|------------|--------------|---------|
+| `feat` | MINOR | `feat: Add user authentication` → `1.2.0` → `1.3.0` |
+| `fix` | PATCH | `fix: Resolve login bug` → `1.2.3` → `1.2.4` |
+| `perf` | PATCH | `perf: Improve query performance` → `1.2.3` → `1.2.4` |
+| `refactor` | PATCH | `refactor: Simplify API handling` → `1.2.3` → `1.2.4` |
+| `docs` | PATCH | `docs: Update README` → `1.2.3` → `1.2.4` |
+| `style` | PATCH | `style: Format code` → `1.2.3` → `1.2.4` |
+| `test` | PATCH | `test: Add unit tests` → `1.2.3` → `1.2.4` |
+| `chore` | PATCH | `chore: Update dependencies` → `1.2.3` → `1.2.4` |
+| `BREAKING CHANGE` | MAJOR | `feat!: Remove deprecated API` → `1.2.3` → `2.0.0` |
+
+### Breaking Changes
+
+To indicate a breaking change in a commit:
+
+```bash
+# Use ! after type or BREAKING CHANGE in footer
+git commit -m "feat!: Remove deprecated API endpoint"
+
+# Or in commit body
+git commit -m "feat: Add new API" -m "BREAKING CHANGE: Old API removed"
+```
+
+## Release Process
+
+### Pre-Release Checklist
+
+Before creating a new version:
+
+- [ ] All features are complete
+- [ ] All tests pass
+- [ ] Documentation is updated
+- [ ] CHANGELOG.md is updated
+- [ ] Code is reviewed and approved
+- [ ] Build succeeds
+- [ ] No breaking changes (or documented if intentional)
+
+### Release Steps
+
+1. **Finalize Changes**: Ensure all work is complete and merged
+2. **Update CHANGELOG**: Move items from `[Unreleased]` to new version
+3. **Run Quality Checks**: Lint, test, build
+4. **Bump Version**: Run appropriate version command
+5. **Review Changes**: Verify version bump and changelog
+6. **Commit and Tag**: Commit version bump (creates tag automatically)
+7. **Push to Remote**: Push commits and tags
+8. **Create GitHub Release**: Create release on GitHub (optional but recommended)
+9. **Deploy**: Deploy new version to production
+
+### GitHub Releases
+
+After pushing version tag, create a GitHub release:
+
+1. Go to GitHub repository → Releases → Draft a new release
+2. Select the version tag (e.g., `v1.2.3`)
+3. Use release title: `v1.2.3` or `Version 1.2.3`
+4. Copy relevant section from CHANGELOG.md as release notes
+5. Mark as "Latest release" if this is the newest version
+6. Publish release
+
+## Version in Code
+
+### Accessing Version
+
+The version from `package.json` can be accessed in code:
+
+**Server-Side (Node.js):**
+```typescript
+import packageJson from './package.json';
+const version = packageJson.version;
+```
+
+**Client-Side (Next.js):**
+```typescript
+// In a Server Component or API Route
+import packageJson from '@/package.json';
+const version = packageJson.version;
+
+// Or use environment variable
+const version = process.env.NEXT_PUBLIC_APP_VERSION;
+```
+
+### Version API Endpoint (Optional)
+
+Create an API endpoint to expose version:
+
+```typescript
+// app/api/version/route.ts
+import packageJson from '@/package.json';
+
+export async function GET() {
+  return Response.json({
+    version: packageJson.version,
+    name: packageJson.name,
+  });
+}
+```
+
+## Best Practices
+
+### DO
+
+- ✅ Bump version before merging to main (or after, depending on workflow)
+- ✅ Update CHANGELOG.md with every version bump
+- ✅ Use semantic versioning consistently
+- ✅ Tag releases in git
+- ✅ Document breaking changes clearly
+- ✅ Test version bump process
+- ✅ Push tags to remote repository
+- ✅ Create GitHub releases for major/minor versions
+
+### DON'T
+
+- ❌ Bump version for every commit (bump when releasing)
+- ❌ Skip CHANGELOG updates
+- ❌ Use non-semantic version numbers
+- ❌ Forget to push tags
+- ❌ Bump major version for minor changes
+- ❌ Bump minor version for patches
+- ❌ Skip version bumping entirely
+
+## Version Bump Decision Tree
+
+```
+Is this a breaking change?
+├─ YES → Bump MAJOR version
+└─ NO → Is this a new feature?
+    ├─ YES → Bump MINOR version
+    └─ NO → Is this a bug fix or small change?
+        ├─ YES → Bump PATCH version
+        └─ NO → No version bump needed
+```
+
+## Troubleshooting
+
+### Version Not Updating
+
+- Check `package.json` for correct version format
+- Ensure npm scripts are correct
+- Check git status for uncommitted changes
+
+### Tag Already Exists
+
+- If tag exists, delete it: `git tag -d v1.2.3`
+- Delete remote tag: `git push origin --delete v1.2.3`
+- Re-run version bump command
+
+### CHANGELOG Not Updating
+
+- CHANGELOG updates are manual by default
+- Update `CHANGELOG.md` before or after version bump
+- Can be automated with additional tooling if desired
+
+## Integration with CI/CD
+
+### Automated Version Bumping (Optional)
+
+For automated version bumping based on commit messages:
+
+1. Use tools like `semantic-release` or `standard-version`
+2. Configure CI to detect commit types
+3. Automatically bump version and create tags
+4. Generate CHANGELOG from commits
+
+### CI/CD Version Checks
+
+- Verify version format in CI
+- Check that version was bumped for releases
+- Validate CHANGELOG updates
+- Ensure tags are pushed
+
+## References
+
+- [Semantic Versioning](https://semver.org/)
+- [Keep a Changelog](https://keepachangelog.com/)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [npm version documentation](https://docs.npmjs.com/cli/v8/commands/npm-version)
