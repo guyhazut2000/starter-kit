@@ -6,6 +6,86 @@ alwaysApply: true
 
 # Git Conventions
 
+## 🚨 CRITICAL MANDATORY RULES - NEVER SKIP THESE
+
+### ⚠️ RULE #1: ALWAYS SYNC WITH MASTER BEFORE PUSHING
+
+**BEFORE PUSHING ANY FEATURE BRANCH, YOU MUST:**
+
+1. **Fetch latest from remote:**
+
+   ```bash
+   git fetch origin
+   ```
+
+2. **Merge master into your feature branch:**
+
+   ```bash
+   git checkout feature/your-branch-name
+   git merge origin/master
+   # OR
+   git merge origin/main
+   ```
+
+3. **Resolve any conflicts immediately:**
+   - If conflicts occur, resolve them BEFORE pushing
+   - Test after resolving conflicts
+   - Commit the merge resolution
+
+4. **Verify branch is up to date:**
+
+   ```bash
+   git log HEAD..origin/master --oneline
+   # Should show NO commits (empty output means you're up to date)
+   ```
+
+5. **ONLY THEN push:**
+   ```bash
+   git push origin feature/your-branch-name
+   ```
+
+**❌ NEVER push a branch without syncing with master first**
+**❌ NEVER create a PR if your branch is behind master**
+**✅ ALWAYS verify `git log HEAD..origin/master` shows nothing before pushing**
+
+### ⚠️ RULE #2: ALWAYS VERIFY NO CONFLICTS BEFORE CREATING PR
+
+**BEFORE CREATING A PULL REQUEST, YOU MUST:**
+
+1. **Check if branch is ahead/behind master:**
+
+   ```bash
+   git fetch origin
+   git log HEAD..origin/master --oneline  # Commits in master not in your branch
+   git log origin/master..HEAD --oneline  # Commits in your branch not in master
+   ```
+
+2. **If your branch is behind master:**
+   - You MUST merge master into your branch first (see Rule #1)
+   - Resolve any conflicts
+   - Push the updated branch
+
+3. **Verify clean merge status:**
+
+   ```bash
+   git status
+   # Should show "Your branch is up to date with 'origin/feature/your-branch'"
+   # Should show "nothing to commit, working tree clean"
+   ```
+
+4. **Test that merge works:**
+   ```bash
+   npm run lint
+   npm run build
+   npm test
+   ```
+
+**❌ NEVER create a PR if `git log HEAD..origin/master` shows commits**
+**❌ NEVER create a PR if there are uncommitted changes**
+**✅ ALWAYS ensure branch is fully synced and tested before creating PR**
+
+**These rules ensure you can click "Merge" on GitHub without conflicts.**
+
 ## Commit Message Format
 
 ### Conventional Commits
@@ -299,31 +379,38 @@ git commit
 
 ### Syncing with Master/Main (BEFORE Creating PR)
 
+**⚠️ MANDATORY: See RULE #1 and RULE #2 at the top of this file. You MUST follow them.**
+
 **⚠️ ALWAYS sync with master/main before creating a PR:**
 
 ```bash
-# 1. Ensure master/main is up to date
-git checkout master
-git pull origin master
-
-# 2. Switch back to your feature branch
-git checkout feature/feature-name
-
-# 3. Fetch latest changes
+# 1. Fetch latest changes from remote
 git fetch origin
 
-# 4. Merge master into your branch
+# 2. Check if your branch is behind master
+git log HEAD..origin/master --oneline
+# If this shows commits, you MUST merge master first (see RULE #1)
+
+# 3. Merge master into your branch
+git checkout feature/feature-name
 git merge origin/master
 # OR
 git merge origin/main
 
-# 5. If conflicts occur, resolve them:
+# 4. If conflicts occur, resolve them:
 # - Review conflicted files
 # - Resolve conflicts manually
 # - Test after resolving
 # - Commit the merge
 
-# 6. Push updated branch
+# 5. Verify you're up to date (should show nothing):
+git log HEAD..origin/master --oneline
+
+# 6. Verify clean working tree:
+git status
+# Should show "nothing to commit, working tree clean"
+
+# 7. Push updated branch
 git push origin feature/feature-name
 ```
 
@@ -337,7 +424,11 @@ git rebase origin/master
 git push origin feature/feature-name --force-with-lease
 ```
 
-**⚠️ IMPORTANT**: Always sync with master/main BEFORE creating PR to avoid conflicts.
+**⚠️ CRITICAL**:
+
+- **NEVER** create a PR if `git log HEAD..origin/master` shows commits
+- **ALWAYS** verify branch is fully synced before pushing (see RULE #1 and RULE #2)
+- **ALWAYS** resolve conflicts locally before creating PR
 
 ### ⚠️ MANDATORY: Post-Merge Workflow (ALWAYS Follow This)
 
@@ -382,7 +473,6 @@ git push origin feature/feature-name --force-with-lease
    ```
 
    **Why delete merged branches?**
-
    - ✅ Keeps repository clean and organized
    - ✅ All commits remain in git history (nothing is lost)
    - ✅ Can recreate branch from history if needed
@@ -390,7 +480,6 @@ git push origin feature/feature-name --force-with-lease
    - ✅ Makes it clear which branches are active vs merged
 
    **When to keep temporarily (rare cases):**
-
    - Hotfix needed immediately after merge (keep for 1-2 days max)
    - Related follow-up work planned (delete after follow-up is done)
    - Uncertain if merge was successful (verify, then delete)
@@ -443,7 +532,6 @@ git push origin feature/feature-name --force-with-lease
    ```
 
 2. **Work on Feature**:
-
    - Make commits
    - Push to remote
    - Create PR

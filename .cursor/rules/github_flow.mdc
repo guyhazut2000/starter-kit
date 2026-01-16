@@ -6,6 +6,81 @@ alwaysApply: true
 
 # GitHub Flow Best Practices
 
+## 🚨 CRITICAL MANDATORY RULES - NEVER SKIP THESE
+
+### ⚠️ RULE #1: ALWAYS SYNC WITH MASTER BEFORE PUSHING
+
+**BEFORE PUSHING ANY FEATURE BRANCH, YOU MUST:**
+
+1. **Fetch latest from remote:**
+   ```bash
+   git fetch origin
+   ```
+
+2. **Merge master into your feature branch:**
+   ```bash
+   git checkout feature/your-branch-name
+   git merge origin/master
+   # OR
+   git merge origin/main
+   ```
+
+3. **Resolve any conflicts immediately:**
+   - If conflicts occur, resolve them BEFORE pushing
+   - Test after resolving conflicts
+   - Commit the merge resolution
+
+4. **Verify branch is up to date:**
+   ```bash
+   git log HEAD..origin/master --oneline
+   # Should show NO commits (empty output means you're up to date)
+   ```
+
+5. **ONLY THEN push:**
+   ```bash
+   git push origin feature/your-branch-name
+   ```
+
+**❌ NEVER push a branch without syncing with master first**
+**❌ NEVER create a PR if your branch is behind master**
+**✅ ALWAYS verify `git log HEAD..origin/master` shows nothing before pushing**
+
+### ⚠️ RULE #2: ALWAYS VERIFY NO CONFLICTS BEFORE CREATING PR
+
+**BEFORE CREATING A PULL REQUEST, YOU MUST:**
+
+1. **Check if branch is ahead/behind master:**
+   ```bash
+   git fetch origin
+   git log HEAD..origin/master --oneline  # Commits in master not in your branch
+   git log origin/master..HEAD --oneline  # Commits in your branch not in master
+   ```
+
+2. **If your branch is behind master:**
+   - You MUST merge master into your branch first (see Rule #1)
+   - Resolve any conflicts
+   - Push the updated branch
+
+3. **Verify clean merge status:**
+   ```bash
+   git status
+   # Should show "Your branch is up to date with 'origin/feature/your-branch'"
+   # Should show "nothing to commit, working tree clean"
+   ```
+
+4. **Test that merge works:**
+   ```bash
+   npm run lint
+   npm run build
+   npm test
+   ```
+
+**❌ NEVER create a PR if `git log HEAD..origin/master` shows commits**
+**❌ NEVER create a PR if there are uncommitted changes**
+**✅ ALWAYS ensure branch is fully synced and tested before creating PR**
+
+**These rules ensure you can click "Merge" on GitHub without conflicts.**
+
 ## 🎯 Quick Reference: The Golden Rule
 
 **FOR EVERY FEATURE/TASK:**
@@ -66,23 +141,44 @@ git branch --show-current
 - Test your changes
 - Run linting and build checks
 
-**STEP 4: Before Creating PR**
+**STEP 4: Before Creating PR (MANDATORY - See RULE #1 and RULE #2)**
+
 ```bash
-# Ensure branch is up to date with master
+# 1. Fetch latest changes
 git fetch origin
+
+# 2. Check if branch is behind master (MANDATORY CHECK)
+git log HEAD..origin/master --oneline
+# If this shows commits, you MUST merge master first!
+
+# 3. Merge master into your branch
 git merge origin/master
 # OR
 git merge origin/main
 
-# Run quality checks
+# 4. Resolve any conflicts (if they occur)
+# - Fix conflicts in files
+# - Test after resolving
+# - Commit the merge
+
+# 5. Verify branch is up to date (should show nothing)
+git log HEAD..origin/master --oneline
+
+# 6. Verify clean working tree
+git status
+# Should show "nothing to commit, working tree clean"
+
+# 7. Run quality checks
 npm run lint
 npx tsc --noEmit
 npm run build
 npm test
 
-# Push your branch
+# 8. ONLY THEN push your branch
 git push -u origin feature/feature-name
 ```
+
+**⚠️ CRITICAL**: Do NOT skip step 2. If `git log HEAD..origin/master` shows commits, you MUST merge master first or the PR will have conflicts!
 
 **STEP 5: Create Pull Request**
 - Create PR from feature branch to master/main
