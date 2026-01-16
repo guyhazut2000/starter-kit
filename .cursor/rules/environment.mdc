@@ -9,6 +9,7 @@ alwaysApply: true
 ## Environment Types
 
 ### Development
+
 - **Purpose**: Local development
 - **Database**: Local PostgreSQL or SQLite
 - **Logging**: Console + file logging, verbose
@@ -17,6 +18,7 @@ alwaysApply: true
 - **Hot Reload**: Enabled
 
 ### Staging
+
 - **Purpose**: Pre-production testing
 - **Database**: Staging database (separate from production)
 - **Logging**: Structured logging, info level
@@ -25,6 +27,7 @@ alwaysApply: true
 - **Monitoring**: Full monitoring enabled
 
 ### Test
+
 - **Purpose**: Automated testing
 - **Database**: Test database (can be reset)
 - **Logging**: Minimal logging
@@ -33,6 +36,7 @@ alwaysApply: true
 - **Isolation**: Each test run is isolated
 
 ### Production
+
 - **Purpose**: Live application
 - **Database**: Production database (backed up)
 - **Logging**: Structured logging, error level
@@ -128,19 +132,21 @@ ENABLE_DEBUG_MODE="false"
 ### Rules
 
 - **UPPER_SNAKE_CASE**: All environment variables
-- **NEXT_PUBLIC_***: Prefix for client-accessible variables
+- **NEXT*PUBLIC*\***: Prefix for client-accessible variables
 - **Descriptive names**: Clear purpose from name
 - **Grouped by purpose**: Database, API, Feature Flags, etc.
 
 ### Client vs Server Variables
 
 **Server-only** (no `NEXT_PUBLIC_` prefix):
+
 - Database URLs
 - API keys and secrets
 - Internal service URLs
 - Server configuration
 
 **Client-accessible** (`NEXT_PUBLIC_` prefix):
+
 - Public API URLs
 - Public feature flags
 - Analytics IDs
@@ -151,6 +157,7 @@ ENABLE_DEBUG_MODE="false"
 ### Development
 
 **Local Development:**
+
 ```bash
 # Start development server
 npm run dev
@@ -163,6 +170,7 @@ npm run dev -- -p 3001
 ```
 
 **Requirements:**
+
 - Local database running
 - Environment variables in `.env.local`
 - Node.js 20+ installed
@@ -171,6 +179,7 @@ npm run dev -- -p 3001
 ### Staging
 
 **Deployment Process:**
+
 1. Merge to `main` branch
 2. CI/CD pipeline runs tests
 3. Build application
@@ -179,6 +188,7 @@ npm run dev -- -p 3001
 6. Notify team of deployment
 
 **Verification:**
+
 - Check application loads
 - Verify database connections
 - Test critical user flows
@@ -187,6 +197,7 @@ npm run dev -- -p 3001
 ### Production
 
 **Deployment Process:**
+
 1. Code reviewed and approved
 2. All tests pass
 3. Staging deployment verified
@@ -196,6 +207,7 @@ npm run dev -- -p 3001
 7. Rollback plan ready
 
 **Pre-Deployment Checklist:**
+
 - [ ] All tests pass
 - [ ] Code reviewed and approved
 - [ ] Database migrations tested
@@ -206,6 +218,7 @@ npm run dev -- -p 3001
 - [ ] Team notified
 
 **Post-Deployment:**
+
 - [ ] Verify application is running
 - [ ] Check error logs
 - [ ] Monitor performance metrics
@@ -250,9 +263,11 @@ npx prisma migrate status
 ```typescript
 // Verbose logging
 logger.level = "debug";
-logger.add(new winston.transports.Console({
-  format: winston.format.simple()
-}));
+logger.add(
+  new winston.transports.Console({
+    format: winston.format.simple(),
+  })
+);
 ```
 
 ### Staging
@@ -260,9 +275,11 @@ logger.add(new winston.transports.Console({
 ```typescript
 // Info level logging
 logger.level = "info";
-logger.add(new winston.transports.File({
-  filename: "app.log"
-}));
+logger.add(
+  new winston.transports.File({
+    filename: "app.log",
+  })
+);
 ```
 
 ### Production
@@ -270,28 +287,35 @@ logger.add(new winston.transports.File({
 ```typescript
 // Error level logging
 logger.level = "error";
-logger.add(new winston.transports.File({
-  filename: "error.log",
-  level: "error"
-}));
-logger.add(new winston.transports.File({
-  filename: "combined.log"
-}));
+logger.add(
+  new winston.transports.File({
+    filename: "error.log",
+    level: "error",
+  })
+);
+logger.add(
+  new winston.transports.File({
+    filename: "combined.log",
+  })
+);
 ```
 
 ## Caching Strategy by Environment
 
 ### Development
+
 - Minimal caching
 - Fast refresh for development
 - Cache invalidation on every change
 
 ### Staging
+
 - Moderate caching
 - Shorter TTL (1-5 minutes)
 - Cache invalidation after deployments
 
 ### Production
+
 - Full caching enabled
 - Appropriate TTL based on data freshness
 - Cache invalidation via revalidation
@@ -299,16 +323,19 @@ logger.add(new winston.transports.File({
 ## Error Handling by Environment
 
 ### Development
+
 - Detailed error messages
 - Stack traces shown
 - Helpful debugging information
 
 ### Staging
+
 - User-friendly messages
 - Detailed logs for debugging
 - Error tracking enabled
 
 ### Production
+
 - User-friendly messages only
 - No technical details exposed
 - Errors logged for monitoring
@@ -319,6 +346,7 @@ logger.add(new winston.transports.File({
 ### Metrics to Monitor
 
 **Application:**
+
 - Response times
 - Error rates
 - Request counts
@@ -326,12 +354,14 @@ logger.add(new winston.transports.File({
 - CPU usage
 
 **Database:**
+
 - Query performance
 - Connection pool usage
 - Migration status
 - Database size
 
 **Infrastructure:**
+
 - Server health
 - Network latency
 - Disk usage
@@ -340,12 +370,14 @@ logger.add(new winston.transports.File({
 ### Alerting
 
 **Critical Alerts:**
+
 - Application down
 - Database connection failures
 - High error rates
 - Security incidents
 
 **Warning Alerts:**
+
 - High response times
 - Approaching resource limits
 - Unusual traffic patterns
@@ -382,17 +414,20 @@ logger.add(new winston.transports.File({
 ### Environment-Specific
 
 **Development:**
+
 - Use development API keys
 - Local database (not production data)
 - Debug mode can be enabled
 
 **Staging:**
+
 - Use staging API keys
 - Separate staging database
 - No production data
 - Can test security features
 
 **Production:**
+
 - Use production API keys (securely stored)
 - Production database (backed up)
 - No debug information exposed
@@ -416,7 +451,7 @@ export async function GET() {
   try {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`;
-    
+
     return Response.json(
       { status: "healthy", timestamp: new Date().toISOString() },
       { status: 200 }
