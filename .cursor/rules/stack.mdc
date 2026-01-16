@@ -1,0 +1,514 @@
+---
+description: Technical stack specifics, framework versions, key dependencies, configuration patterns, and API conventions
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Technical Stack
+
+## Framework Versions
+
+### Core
+- **Next.js**: 16.1.2+ (App Router)
+- **React**: 19.2.3+
+- **React DOM**: 19.2.3+
+- **TypeScript**: 5.0+
+
+### Styling
+- **Tailwind CSS**: 4.0+
+- **PostCSS**: Latest (via @tailwindcss/postcss)
+
+### Development
+- **Node.js**: 20+ (LTS recommended)
+- **npm**: Latest (or use package manager of choice)
+
+## Key Dependencies and Purposes
+
+### Core Framework
+```json
+{
+  "next": "^16.1.2",           // React framework with App Router
+  "react": "^19.2.3",         // UI library
+  "react-dom": "^19.2.3"      // React DOM renderer
+}
+```
+
+### Data & Validation
+```json
+{
+  "@prisma/client": "^5.0.0", // Prisma ORM client
+  "prisma": "^5.0.0",          // Prisma CLI and tools
+  "zod": "^3.22.0"             // Runtime validation and type inference
+}
+```
+
+### State Management
+```json
+{
+  "@tanstack/react-query": "^5.0.0"  // Server state management, caching, synchronization
+}
+```
+
+### UI & Styling
+```json
+{
+  "tailwindcss": "^4.0.0",           // Utility-first CSS framework
+  "@tailwindcss/postcss": "^4.0.0",  // PostCSS plugin for Tailwind
+  "@radix-ui/react-*": "latest"      // Headless UI primitives (via Shadcn)
+}
+```
+
+### Logging
+```json
+{
+  "winston": "^3.11.0",              // Structured logging
+  "winston-daily-rotate-file": "^4.7.0"  // Log rotation (optional)
+}
+```
+
+### Testing
+```json
+{
+  "@testing-library/react": "^14.0.0",  // Component testing
+  "@testing-library/jest-dom": "^6.0.0", // DOM matchers
+  "@testing-library/user-event": "^14.0.0", // User interaction simulation
+  "jest": "^29.0.0",                    // Test runner
+  "jest-environment-jsdom": "^29.0.0"   // DOM environment for Jest
+}
+```
+
+### Development Tools
+```json
+{
+  "eslint": "^9.0.0",                  // Linting
+  "eslint-config-next": "^16.1.2",     // Next.js ESLint config
+  "@types/node": "^20.0.0",            // Node.js type definitions
+  "@types/react": "^19.0.0",           // React type definitions
+  "@types/react-dom": "^19.0.0"        // React DOM type definitions
+}
+```
+
+## Configuration Patterns
+
+### Next.js Configuration
+
+**`next.config.ts`:**
+```typescript
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // React strict mode
+  reactStrictMode: true,
+  
+  // Image optimization
+  images: {
+    domains: ["example.com"], // Add image domains
+    formats: ["image/avif", "image/webp"],
+  },
+  
+  // Environment variables
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  
+  // Experimental features (if needed)
+  experimental: {
+    // Only enable when needed
+  },
+  
+  // TypeScript and ESLint
+  typescript: {
+    // Fail build on type errors in production
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    // Fail build on lint errors in production
+    ignoreDuringBuilds: false,
+  },
+};
+
+export default nextConfig;
+```
+
+### TypeScript Configuration
+
+**`tsconfig.json`:**
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/features/*": ["./features/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+### Tailwind Configuration
+
+**`tailwind.config.ts`:**
+```typescript
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./features/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Custom color palette
+        // Use Shadcn theme colors
+      },
+      fontFamily: {
+        // Custom fonts
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
+```
+
+### Prisma Configuration
+
+**`prisma/schema.prisma`:**
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite", etc.
+  url      = env("DATABASE_URL")
+}
+
+// Models defined here
+```
+
+### ESLint Configuration
+
+**`eslint.config.mjs`:**
+```javascript
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // Custom rules
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+];
+
+export default eslintConfig;
+```
+
+### Winston Logging Configuration
+
+**`lib/logger.ts`:**
+```typescript
+import winston from "winston";
+
+const logger = winston.createLogger({
+  level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: "nextjs-app" },
+  transports: [
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
+  ],
+});
+
+if (process.env.NODE_ENV !== "production") {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    })
+  );
+}
+
+export default logger;
+```
+
+## API Conventions
+
+### Server Actions (Preferred)
+
+**Pattern:**
+```typescript
+// features/[feature]/_actions/[feature]-actions.ts
+"use server";
+
+import { z } from "zod";
+import { schema } from "@/features/[feature]/_schemas/[feature]-schema";
+import { revalidatePath } from "next/cache";
+
+export async function createItem(formData: FormData) {
+  // 1. Extract and validate
+  const rawData = Object.fromEntries(formData.entries());
+  const result = schema.safeParse(rawData);
+  
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.errors.map(e => e.message).join(", "),
+      fieldErrors: result.error.flatten().fieldErrors,
+    };
+  }
+  
+  // 2. Business logic
+  // ...
+  
+  // 3. Revalidate cache
+  revalidatePath("/items");
+  
+  // 4. Return result
+  return { success: true, data: item };
+}
+```
+
+**Response Format:**
+```typescript
+// Success
+{ success: true, data: T }
+
+// Error
+{ 
+  success: false, 
+  error: string,
+  fieldErrors?: Record<string, string[]>
+}
+```
+
+### API Routes (Public Endpoints Only)
+
+**Pattern:**
+```typescript
+// app/api/[resource]/route.ts
+import { z } from "zod";
+import { schema } from "@/features/[feature]/_schemas/[feature]-schema";
+
+export async function GET(request: Request) {
+  try {
+    // Query parameters
+    const { searchParams } = new URL(request.url);
+    const page = searchParams.get("page") || "1";
+    
+    // Fetch data
+    // ...
+    
+    return Response.json({ data: items, page: Number(page) });
+  } catch (error) {
+    return Response.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    
+    // Validate
+    const result = schema.safeParse(body);
+    if (!result.success) {
+      return Response.json(
+        { error: "Validation failed", details: result.error.errors },
+        { status: 400 }
+      );
+    }
+    
+    // Process
+    // ...
+    
+    return Response.json({ success: true, data: item }, { status: 201 });
+  } catch (error) {
+    return Response.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**HTTP Status Codes:**
+- `200` - Success (GET, PUT, PATCH)
+- `201` - Created (POST)
+- `204` - No Content (DELETE)
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `500` - Internal Server Error
+
+### Authentication Approach
+
+**Session-Based (Recommended for Next.js):**
+- Use NextAuth.js or similar
+- Server-side session management
+- Secure HTTP-only cookies
+
+**Token-Based (If needed):**
+- JWT tokens for API authentication
+- Store in secure HTTP-only cookies
+- Refresh token pattern for long-lived sessions
+
+### TanStack Query Configuration
+
+**Setup:**
+```typescript
+// app/providers.tsx
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useState } from "react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 minute
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+}
+```
+
+**Usage Pattern:**
+```typescript
+// features/products/_hooks/useProducts.ts
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import type { Product } from "@/features/products/_types/product";
+
+async function fetchProducts(): Promise<Product[]> {
+  const res = await fetch("/api/products");
+  if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json();
+}
+
+export function useProducts() {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+}
+```
+
+## Environment Variables
+
+### Required Variables
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+
+# Next.js
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### Optional Variables
+```env
+# API Keys
+API_KEY="your-api-key"
+
+# Logging
+LOG_LEVEL="debug" # or "info", "warn", "error"
+
+# Feature Flags
+ENABLE_FEATURE_X="true"
+```
+
+### Naming Convention
+- `NEXT_PUBLIC_*` for client-accessible variables
+- UPPER_SNAKE_CASE for all variables
+- Group related variables with comments
+
+## Best Practices
+
+### Dependency Management
+- Keep dependencies up to date
+- Use exact versions for critical dependencies (if needed)
+- Review and audit dependencies regularly
+- Use `npm audit` to check for vulnerabilities
+
+### Performance
+- Use Server Components by default
+- Implement proper caching strategies
+- Optimize images with `next/image`
+- Code split with dynamic imports
+- Monitor bundle size
+
+### Security
+- Never commit secrets to version control
+- Use environment variables for sensitive data
+- Validate all inputs with Zod
+- Sanitize user inputs
+- Use HTTPS in production
+- Implement rate limiting for APIs
+
+### Type Safety
+- Enable TypeScript strict mode
+- Use Zod for runtime validation
+- Derive types from Zod schemas
+- Avoid `any` type
+- Use type guards for unknown types

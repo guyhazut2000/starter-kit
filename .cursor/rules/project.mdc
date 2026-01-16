@@ -1,0 +1,251 @@
+---
+description: Overall project context, tech stack, structure overview, and key architectural decisions
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Project Overview
+
+## Project Context
+
+This is a modern Next.js application built with TypeScript, following feature-based architecture principles and best practices for scalability, maintainability, and developer experience.
+
+## Tech Stack
+
+### Core Framework
+- **Next.js 16+** with App Router
+- **React 19+** for UI components
+- **TypeScript 5+** for type safety
+
+### Data & State Management
+- **Prisma ORM** for database operations
+- **TanStack Query (React Query)** for server state management
+- **Zod** for runtime validation and type inference
+
+### Styling & UI
+- **Tailwind CSS 4+** for utility-first styling
+- **Shadcn UI** for accessible component primitives
+- **CSS Modules** for component-scoped styles (when needed)
+
+### Development & Quality
+- **ESLint** for code linting
+- **Prettier** for code formatting (if configured)
+- **Winston** for structured logging
+- **Jest** + **React Testing Library** for testing
+
+### Additional Tools
+- **TanStack Table** for data tables
+- **TanStack Router** (if used for advanced routing)
+- Other popular tools as needed
+
+## Project Structure Overview
+
+```
+/
+├── app/                      # Next.js App Router
+│   ├── (auth)/              # Route groups
+│   ├── (dashboard)/
+│   ├── api/                 # Public API routes only
+│   └── [routes]/            # App routes
+├── features/                # Feature-based organization
+│   ├── [feature]/
+│   │   ├── _actions/        # Server Actions
+│   │   ├── _components/     # Feature components
+│   │   ├── _hooks/          # Feature hooks
+│   │   ├── _lib/            # Feature utilities
+│   │   ├── _schemas/        # Zod schemas
+│   │   └── _types/          # TypeScript types
+├── components/              # Shared UI components
+│   ├── ui/                  # Base UI (Shadcn)
+│   └── layout/              # Layout components
+├── lib/                     # Shared utilities
+│   ├── prisma.ts            # Prisma client
+│   └── utils.ts             # Common utilities
+├── services/                # External services
+├── styles/                  # Global styles
+├── public/                  # Static assets
+└── [config files]          # Configuration files
+```
+
+## Key Architectural Decisions
+
+### 1. Feature-Based Organization
+- All feature code is colocated in `features/[feature]/` folders
+- Each feature is self-contained with its own actions, components, hooks, schemas, and types
+- Promotes modularity, maintainability, and easier refactoring
+
+### 2. Server-First Approach
+- Prefer Server Components by default
+- Use Server Actions for mutations (not API routes)
+- API Routes only for public endpoints consumed by external services
+- Minimize client-side JavaScript bundle size
+
+### 3. Type Safety
+- TypeScript for compile-time type checking
+- Zod for runtime validation and type inference
+- Shared types derived from Zod schemas using `z.infer<>`
+
+### 4. Validation Strategy
+- Zod schemas colocated with features in `_schemas/` folders
+- Validate both client-side and server-side
+- Use `.safeParse()` for error handling (never `.parse()` in production)
+
+### 5. Database Management
+- Prisma ORM for type-safe database access
+- Always use migrations for schema changes (never edit database directly)
+- Single Prisma Client instance via `lib/prisma.ts`
+
+### 6. State Management
+- TanStack Query for server state (caching, synchronization, background updates)
+- React Context for global client state (when needed)
+- Local component state for UI-only state
+
+### 7. Styling Approach
+- Tailwind CSS for utility-first styling
+- Shadcn UI for accessible, customizable components
+- Consistent design system through Tailwind configuration
+
+### 8. Error Handling
+- Error boundaries at route level (`error.tsx`)
+- Proper error handling in Server Actions
+- User-friendly error messages (don't expose technical details)
+- Structured logging with Winston
+
+### 9. Testing Strategy
+- Unit tests for utilities and business logic
+- Component tests for UI components
+- Integration tests for feature workflows
+- E2E tests for critical user journeys (if applicable)
+
+### 10. Code Quality
+- ESLint for code quality checks
+- TypeScript strict mode enabled
+- Consistent code formatting
+- Pre-commit hooks for quality gates (if configured)
+
+## Build and Run Commands
+
+### Development
+```bash
+# Start development server
+npm run dev
+
+# Run with specific port
+npm run dev -- -p 3001
+
+# Type checking
+npx tsc --noEmit
+
+# Linting
+npm run lint
+
+# Format code (if Prettier configured)
+npm run format
+```
+
+### Testing
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- path/to/test.file.tsx
+```
+
+### Building
+```bash
+# Production build
+npm run build
+
+# Start production server
+npm start
+
+# Analyze bundle size
+npm run build -- --analyze
+```
+
+### Database
+```bash
+# Generate Prisma Client
+npx prisma generate
+
+# Create migration
+npx prisma migrate dev --name migration_name
+
+# Apply migrations (production)
+npx prisma migrate deploy
+
+# Open Prisma Studio
+npx prisma studio
+
+# Reset database (development only)
+npx prisma migrate reset
+```
+
+### Code Quality
+```bash
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint -- --fix
+
+# Type check
+npx tsc --noEmit
+```
+
+## Environment Variables
+
+### Development (`.env.local`)
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+
+# Next.js
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# API Keys (if needed)
+API_KEY="your-api-key"
+```
+
+### Production
+- Use environment-specific secrets management
+- Never commit `.env` files to version control
+- Use `.env.example` as template
+
+## Development Workflow
+
+1. **Create Feature Branch**: `git checkout -b feature/feature-name`
+2. **Develop Feature**: Follow feature-based structure
+3. **Write Tests**: Add tests for new functionality
+4. **Run Quality Checks**: Lint, type-check, tests
+5. **Create Pull Request**: Follow PR guidelines
+6. **Code Review**: Address feedback
+7. **Merge**: After approval and CI passes
+8. **Deploy**: Automatic deployment from main
+
+## Key Principles
+
+- **Feature-Based**: Organize code by feature, not by type
+- **Server-First**: Prefer Server Components and Server Actions
+- **Type-Safe**: Use TypeScript and Zod for end-to-end type safety
+- **Validated**: Always validate with Zod schemas
+- **Tested**: Write tests for all new features
+- **Documented**: Keep code self-documenting with clear naming
+- **Consistent**: Follow established patterns and conventions
+- **Maintainable**: Write code that's easy to understand and modify
+
+## References
+
+- See `github_flow.mdc` for workflow and PR guidelines
+- See `nextjs_architecture.mdc` for detailed architecture patterns
+- See `coding-standards.mdc` for coding conventions
+- See `stack.mdc` for technical stack details
+- See `testing.mdc` for testing guidelines
+- See `environment.mdc` for environment and deployment configs

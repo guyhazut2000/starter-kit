@@ -1,0 +1,1254 @@
+---
+description: GitHub Flow best practices and workflow guidelines - always apply for all development work
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# GitHub Flow Best Practices
+
+## ⚠️ CRITICAL: Branch Check Requirement
+
+**BEFORE making ANY changes, you MUST:**
+
+1. **Check current branch**: Run `git branch --show-current` or `git status`
+2. **If on `master` or `main`**: 
+   - **STOP immediately**
+   - Create a feature branch: `git checkout -b feature/description` or `git checkout -b chore/task-name`
+   - **NEVER commit directly to `master` or `main`**
+3. **Verify you're on a feature branch** before making any changes
+4. **All commits must be on feature branches**, never on `master`/`main`
+
+**Branch naming examples:**
+- `feature/user-authentication`
+- `bugfix/login-error`
+- `chore/update-dependencies`
+- `docs/api-documentation`
+
+**This is MANDATORY for all agents and all work.**
+
+## 1. GitHub Flow Overview
+
+### Core Principles
+
+GitHub Flow is a lightweight, branch-based workflow designed around deployments that happen regularly. The core principles are:
+
+- **Main branch is always deployable**: The `main` branch should always be in a state that can be deployed to production
+- **Feature branches are short-lived**: Create branches from `main`, work on features, and merge back quickly
+- **Pull requests are required**: All changes must go through a pull request before merging to `main`
+- **Continuous integration and deployment**: Automate testing, linting, and deployment
+- **Fast feedback loops**: Get feedback quickly through automated checks and code reviews
+- **Simple, linear history**: Keep the git history clean and easy to follow
+
+### Why GitHub Flow for This Project
+
+- **Simplicity**: Easier to understand and follow than complex branching models
+- **Speed**: Faster iteration cycles with shorter-lived branches
+- **Quality**: PR reviews and CI checks ensure code quality before merging
+- **Collaboration**: Clear process for team members to contribute
+- **Deployment**: Main branch is always ready for deployment
+
+### Key Differences from Git Flow
+
+- **No develop branch**: Work directly from `main`
+- **No release branches**: Features are merged directly to `main` when ready
+- **Simpler hotfix process**: Hotfixes branch from and merge to `main`
+- **Continuous deployment**: Deploy from `main` after every merge
+
+### Integration with CI/CD
+
+GitHub Flow works best when integrated with continuous integration and deployment:
+- Automated tests run on every PR
+- Status checks must pass before merging
+- Automatic deployment from `main` branch
+- Fast feedback on code quality
+
+## 2. Branch Strategy
+
+### Main Branch
+
+- **Name**: `main` (or `master` in older repositories)
+- **Purpose**: Always deployable, production-ready code
+- **Protection**: 
+  - Require pull request reviews before merging
+  - Require status checks to pass
+  - Require branches to be up to date
+  - Do not allow force pushes
+  - Do not allow deletions
+
+### Feature Branch Naming Conventions
+
+Use descriptive, consistent branch names:
+
+- **Features**: `feature/description-of-feature`
+  - Example: `feature/user-authentication`, `feature/dashboard-analytics`
+- **Bug fixes**: `bugfix/description-of-bug` or `fix/description-of-bug`
+  - Example: `bugfix/login-error`, `fix/memory-leak`
+- **Hotfixes**: `hotfix/description-of-issue`
+  - Example: `hotfix/critical-security-patch`
+- **Refactoring**: `refactor/description-of-refactor`
+  - Example: `refactor/api-response-handling`
+- **Documentation**: `docs/description-of-docs`
+  - Example: `docs/api-documentation-update`
+
+**Best practices for branch names:**
+- Use lowercase letters
+- Use hyphens to separate words
+- Be descriptive but concise
+- Include issue/ticket numbers if applicable: `feature/PROJ-123-user-login`
+
+### Branch Lifecycle
+
+1. **Create**: Branch from `main` when starting work
+2. **Work**: Make commits on the feature branch
+3. **Update**: Regularly sync with `main` to avoid conflicts
+4. **Review**: Create a pull request for review
+5. **Merge**: Merge to `main` after approval and CI passes
+6. **Cleanup**: Delete the branch after merging
+
+### Branch Protection Rules
+
+Configure branch protection for `main`:
+- Require pull request reviews (at least 1 approval)
+- Require status checks to pass
+- Require branches to be up to date before merging
+- Require conversation resolution before merging
+- Restrict who can push to `main` (no direct pushes)
+
+## 3. Pull Request Guidelines
+
+### When to Create Pull Requests
+
+- **Early and often**: Create PRs early, even as work-in-progress (use draft PRs)
+- **Small, focused changes**: Keep PRs small and focused on a single feature or fix
+- **Before requesting review**: Ensure code is ready for review (tests pass, linting clean)
+- **For all changes**: No direct commits to `main` - everything goes through PRs
+
+### PR Title Conventions
+
+Use clear, descriptive titles that follow this format:
+
+```
+<type>: <short description>
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+
+**Examples:**
+- ✅ `feat: Add user authentication with OAuth`
+- ✅ `fix: Resolve memory leak in image processing`
+- ✅ `docs: Update API documentation for v2`
+- ❌ `Update code`
+- ❌ `Fixes`
+- ❌ `WIP`
+
+### PR Description Template
+
+Every PR should include:
+
+```markdown
+## Description
+Brief description of what this PR does and why.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Related Issues
+Closes #123
+Related to #456
+
+## Changes Made
+- Change 1
+- Change 2
+- Change 3
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+- [ ] All tests pass locally
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Comments added for complex code
+- [ ] Documentation updated
+- [ ] No new warnings generated
+- [ ] Tests added/updated and passing
+- [ ] Dependencies updated (if applicable)
+```
+
+### Linking Issues and Tickets
+
+- Use GitHub issue linking: `Closes #123` or `Fixes #123`
+- Reference related issues: `Related to #456`
+- Include ticket numbers in branch names when applicable
+- Update issue status when PR is merged
+
+### PR Size Recommendations
+
+**Keep PRs small and focused:**
+- **Ideal**: 200-400 lines of code changes
+- **Acceptable**: Up to 1000 lines for complex features
+- **Too large**: Over 1000 lines - consider splitting into multiple PRs
+
+**Benefits of small PRs:**
+- Faster review process
+- Easier to understand changes
+- Lower risk of introducing bugs
+- Faster feedback loops
+
+### Labels and Categorization
+
+Use labels to categorize PRs:
+- `enhancement`: New features
+- `bug`: Bug fixes
+- `documentation`: Documentation changes
+- `refactoring`: Code refactoring
+- `dependencies`: Dependency updates
+- `breaking-change`: Breaking changes
+- `work-in-progress`: Draft PRs
+- `ready-for-review`: Ready for review
+- `needs-review`: Needs reviewer attention
+
+### Review Checklist
+
+Before requesting review, ensure:
+- [ ] Code follows project style guidelines
+- [ ] All tests pass locally
+- [ ] Linting passes (`npm run lint`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] No console errors or warnings
+- [ ] Self-review completed
+- [ ] PR description is complete
+- [ ] Related issues are linked
+- [ ] Commit messages are clear
+
+### Merge Strategies
+
+**Squash and Merge** (Recommended):
+- Combines all commits into a single commit
+- Cleaner git history
+- Easier to revert if needed
+- Use for feature branches
+
+**Merge Commit**:
+- Preserves individual commit history
+- Use when commit history is important
+- Creates merge commit in history
+
+**Rebase and Merge**:
+- Linear history without merge commits
+- Use when you want a completely linear history
+- Can be more complex for reviewers
+
+**Default**: Use "Squash and Merge" for most PRs unless there's a specific reason to preserve individual commits.
+
+## 4. CI/CD and GitHub Actions
+
+### Required Status Checks Before Merge
+
+All PRs must pass these checks before merging:
+- **Linting**: Code must pass ESLint checks
+- **Tests**: All unit and integration tests must pass
+- **Build**: Project must build successfully
+- **Type checking**: TypeScript type checking must pass (if applicable)
+
+### GitHub Actions Workflow Requirements
+
+**Workflows should be defined in `.github/workflows/`:**
+
+1. **CI Workflow** (runs on PRs and pushes to main):
+   - Install dependencies
+   - Run linting
+   - Run tests
+   - Build project
+   - Type checking
+
+2. **Deployment Workflow** (runs on merge to main):
+   - Build project
+   - Run tests
+   - Deploy to staging/production
+
+### CI Runs on PRs and Main Branch Pushes
+
+- **On Pull Requests**: Run full CI suite
+- **On Push to Main**: Run full CI suite + deployment
+- **On Push to Feature Branches**: Run CI suite (optional, recommended)
+
+### Branch Protection Enforcement
+
+Configure branch protection to:
+- Require status checks to pass before merging
+- Require up-to-date branches before merging
+- Prevent force pushes to main
+- Require pull request reviews
+
+### Secrets Management
+
+- **Use GitHub Secrets**: Never commit secrets to the repository
+- **Scope secrets**: Limit secrets to only necessary workflows
+- **Rotate regularly**: Update secrets periodically
+- **Use environment-specific secrets**: Separate secrets for dev/staging/prod
+
+**Common secrets:**
+- API keys
+- Database credentials
+- Deployment tokens
+- Third-party service credentials
+
+### Workflow Efficiency
+
+**Optimize CI/CD workflows:**
+- **Parallelization**: Run independent jobs in parallel
+- **Caching**: Cache dependencies (node_modules, build artifacts)
+- **Matrix builds**: Test against multiple Node.js versions if needed
+- **Conditional runs**: Skip unnecessary steps when possible
+- **Fast feedback**: Run quick checks (linting) before slow checks (tests)
+
+**Example optimization:**
+```yaml
+# Run linting and type checking in parallel
+# Then run tests
+# Cache node_modules between runs
+```
+
+### Status Check Requirements
+
+- All required status checks must pass
+- Status checks must be up to date (branch synced with main)
+- No failing checks are allowed
+- All checks must complete successfully
+
+## 5. Testing Requirements
+
+### Unit Tests Must Pass
+
+- **Requirement**: All unit tests must pass before merging
+- **Coverage**: Maintain reasonable test coverage (aim for 80%+)
+- **Location**: Tests should be co-located with code or in `__tests__` directories
+- **Naming**: Test files should be `*.test.ts`, `*.test.tsx`, or `*.spec.ts`
+
+### Integration/E2E Tests
+
+- **When applicable**: Add integration tests for critical user flows
+- **Tools**: Use appropriate testing frameworks (Jest, Playwright, Cypress, etc.)
+- **CI Integration**: Run integration tests in CI pipeline
+- **Stability**: Ensure tests are stable and not flaky
+
+### Test Coverage Expectations
+
+- **Minimum**: 70% code coverage
+- **Target**: 80%+ code coverage
+- **Critical paths**: 100% coverage for critical business logic
+- **New code**: New features should include tests
+
+### Running Tests Locally Before PR
+
+**Before creating or updating a PR:**
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode during development
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- path/to/test.file.ts
+```
+
+**Ensure:**
+- All tests pass locally
+- No skipped or disabled tests
+- Test coverage meets requirements
+- Tests run in reasonable time
+
+### Test Commands and Scripts
+
+**Standard test commands:**
+- `npm test` or `npm run test`: Run test suite
+- `npm test -- --watch`: Run tests in watch mode
+- `npm test -- --coverage`: Run tests with coverage report
+- `npm test -- --verbose`: Run tests with verbose output
+
+**Add to package.json:**
+```json
+{
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
+  }
+}
+```
+
+### CI Test Execution
+
+- **Automated**: Tests run automatically on every PR
+- **Parallel**: Run tests in parallel when possible
+- **Fast feedback**: Fail fast on first test failure
+- **Reporting**: Generate and report test coverage
+- **Artifacts**: Save test results and coverage reports
+
+## 6. Linting and Code Quality
+
+### Linting Requirements
+
+**ESLint for Next.js:**
+- Use `eslint-config-next` for Next.js projects
+- Extend recommended configurations
+- Add custom rules as needed
+- Fix linting errors before committing
+
+**Run linting:**
+```bash
+# Check for linting errors
+npm run lint
+
+# Fix auto-fixable issues
+npm run lint -- --fix
+```
+
+### Code Formatting
+
+**Prettier (if used):**
+- Consistent code formatting across the project
+- Auto-format on save (configured in IDE)
+- Format before committing
+- Use `.prettierrc` or `prettier.config.js` for configuration
+
+**Run formatting:**
+```bash
+# Check formatting
+npm run format:check
+
+# Format code
+npm run format
+```
+
+### Lint Checks in CI
+
+- **Required**: Linting must pass in CI before merging
+- **Auto-fix**: Consider auto-fixing linting issues in CI
+- **Fail on errors**: CI should fail if linting errors exist
+- **Report**: Display linting results in PR comments
+
+### Pre-commit Hooks (if applicable)
+
+**Using Husky + lint-staged:**
+- Run linting on staged files before commit
+- Run formatting on staged files
+- Prevent commits with linting errors
+- Fast feedback before pushing
+
+**Setup:**
+```json
+{
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}
+```
+
+### Code Quality Gates
+
+**Enforce code quality:**
+- No linting errors allowed
+- No TypeScript errors allowed
+- No console.log statements in production code (use proper logging)
+- No commented-out code
+- No TODO comments without issue links
+- Proper error handling
+- Meaningful variable and function names
+
+## 7. Build and Deployment
+
+### Build Verification in CI
+
+- **Requirement**: Project must build successfully before merging
+- **Command**: `npm run build`
+- **Failure**: PR cannot be merged if build fails
+- **Artifacts**: Save build artifacts for deployment
+
+### Build Commands and Scripts
+
+**Standard build commands:**
+```bash
+# Production build
+npm run build
+
+# Development build (if applicable)
+npm run build:dev
+
+# Build for specific environment
+npm run build:staging
+npm run build:production
+```
+
+**Ensure build:**
+- Completes without errors
+- Generates expected output
+- Optimizes assets correctly
+- Handles environment variables properly
+
+### Continuous Deployment from Main
+
+- **Trigger**: Automatic deployment on merge to `main`
+- **Process**: Build → Test → Deploy
+- **Environments**: Deploy to staging first, then production
+- **Rollback**: Have rollback procedure ready
+
+### Feature Flags (if applicable)
+
+- **Use feature flags**: For gradual feature rollouts
+- **Configuration**: Manage flags in environment or config service
+- **Testing**: Test with flags enabled/disabled
+- **Cleanup**: Remove flags after feature is fully rolled out
+
+### Rollback Procedures
+
+**Have a rollback plan:**
+- **Quick rollback**: Ability to revert to previous deployment
+- **Database migrations**: Plan for backward-compatible migrations
+- **Communication**: Notify team of rollback
+- **Investigation**: Investigate issues after rollback
+- **Documentation**: Document rollback process
+
+### Environment Management
+
+- **Environments**: Development → Staging → Production
+- **Configuration**: Use environment variables for config
+- **Secrets**: Never commit secrets, use secure storage
+- **Validation**: Validate environment configuration on startup
+- **Documentation**: Document required environment variables
+
+## 8. Commit Message Conventions
+
+### Commit Message Format
+
+**Use Conventional Commits format:**
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style (formatting, missing semicolons, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks (dependencies, build config, etc.)
+- `perf`: Performance improvements
+- `ci`: CI/CD changes
+
+**Scope (optional):**
+- Component or module name
+- Area of codebase affected
+
+**Examples:**
+```
+feat(auth): Add OAuth2 authentication
+
+Implement Google and GitHub OAuth2 providers.
+Add user session management.
+
+Closes #123
+```
+
+```
+fix(api): Resolve memory leak in image processing
+
+The image processing service was not properly releasing
+memory after processing large images.
+
+Fixes #456
+```
+
+```
+docs: Update README with setup instructions
+
+Add detailed setup instructions for new developers.
+Include environment variable configuration.
+```
+
+### Commit Frequency and Size
+
+- **Small, frequent commits**: Commit logical units of work
+- **One change per commit**: Each commit should do one thing
+- **Commit often**: Don't wait until feature is complete
+- **Meaningful commits**: Each commit should be meaningful and reviewable
+
+### Good vs Bad Commit Examples
+
+**✅ Good commits:**
+```
+feat(ui): Add dark mode toggle button
+
+- Add ThemeToggle component
+- Integrate with theme context
+- Add dark mode styles
+
+Closes #789
+```
+
+```
+fix(api): Handle null response in user endpoint
+
+Add null check before accessing user properties.
+Prevents 500 error when user not found.
+
+Fixes #101
+```
+
+**❌ Bad commits:**
+```
+Update code
+```
+
+```
+WIP
+```
+
+```
+fix stuff
+```
+
+```
+feat: changes
+- did some things
+- more changes
+- fixed bugs
+```
+
+### Commit Message Requirements in PRs
+
+- **Clear messages**: Commit messages should be clear and descriptive
+- **Consistent format**: Use Conventional Commits format
+- **Reference issues**: Link to related issues when applicable
+- **Explain why**: Explain the reasoning for complex changes
+- **Review before merge**: Review commit messages during PR review
+
+## 9. Code Review Process
+
+### Review Requirements
+
+- **At least one approval**: PRs require at least one approval before merging
+- **No self-approval**: Authors cannot approve their own PRs
+- **Required reviewers**: Assign specific reviewers for critical changes
+- **Reviewer expertise**: Assign reviewers familiar with the changed code
+
+### What Reviewers Should Check
+
+**Functionality:**
+- Does the code work as intended?
+- Are edge cases handled?
+- Is error handling appropriate?
+- Are there any security concerns?
+
+**Code Quality:**
+- Is the code readable and maintainable?
+- Are naming conventions followed?
+- Is the code properly structured?
+- Are there any code smells?
+
+**Testing:**
+- Are there adequate tests?
+- Do tests cover edge cases?
+- Are tests meaningful and not just for coverage?
+
+**Documentation:**
+- Is the code properly documented?
+- Are complex logic explained?
+- Is the PR description clear?
+
+**Performance:**
+- Are there any performance issues?
+- Could this be optimized?
+- Are there unnecessary operations?
+
+**Best Practices:**
+- Follows project conventions
+- Uses appropriate patterns
+- No anti-patterns
+- Follows security best practices
+
+### Review Turnaround Expectations
+
+- **Target**: Reviews within 24 hours
+- **Urgent**: Critical fixes reviewed within 4 hours
+- **Communication**: Comment if review will be delayed
+- **Availability**: Set expectations for review availability
+
+### Self-Review Before Requesting Review
+
+**Before requesting review:**
+- [ ] Review your own code
+- [ ] Check for obvious issues
+- [ ] Ensure tests pass
+- [ ] Verify linting passes
+- [ ] Check that build succeeds
+- [ ] Review PR description
+- [ ] Check commit messages
+
+### Addressing Review Feedback
+
+- **Respond promptly**: Acknowledge feedback quickly
+- **Ask questions**: Clarify if feedback is unclear
+- **Make changes**: Address all feedback or discuss alternatives
+- **Update PR**: Push changes and update PR
+- **Mark resolved**: Mark conversations as resolved when addressed
+- **Thank reviewers**: Show appreciation for thorough reviews
+
+## 10. Common Workflows
+
+### Feature Development Workflow
+
+1. **Create branch**: `git checkout -b feature/feature-name`
+2. **Make changes**: Implement the feature
+3. **Commit frequently**: Small, logical commits
+4. **Push branch**: `git push origin feature/feature-name`
+5. **Create PR**: Create pull request (draft if WIP)
+6. **Update from main**: Regularly sync with main
+7. **Address feedback**: Respond to review comments
+8. **Wait for CI**: Ensure all checks pass
+9. **Get approval**: Wait for required approvals
+10. **Merge**: Merge to main after approval
+11. **Delete branch**: Delete feature branch after merge
+12. **Deploy**: Automatic deployment from main
+
+### Bug Fix Workflow
+
+1. **Create branch**: `git checkout -b bugfix/description-of-bug`
+2. **Reproduce bug**: Write test that reproduces the bug
+3. **Fix bug**: Implement the fix
+4. **Verify fix**: Ensure test passes and bug is fixed
+5. **Create PR**: Create pull request with fix
+6. **Link issue**: Link to related issue
+7. **Review and merge**: Follow standard PR process
+8. **Close issue**: Issue is closed when PR is merged
+
+### Hotfix Process (Urgent Production Fixes)
+
+1. **Create branch from main**: `git checkout -b hotfix/critical-issue`
+2. **Fix issue**: Implement the fix quickly
+3. **Test thoroughly**: Ensure fix works and doesn't break anything
+4. **Create PR**: Create urgent PR
+5. **Fast-track review**: Request immediate review
+6. **Merge to main**: Merge after approval and CI passes
+7. **Deploy immediately**: Deploy to production
+8. **Verify fix**: Confirm fix works in production
+9. **Document**: Document the hotfix and root cause
+
+### Refactoring Workflow
+
+1. **Create branch**: `git checkout -b refactor/description`
+2. **Plan refactoring**: Document what and why
+3. **Make changes**: Refactor code incrementally
+4. **Maintain tests**: Ensure all tests still pass
+5. **No behavior changes**: Refactoring should not change behavior
+6. **Create PR**: Create PR with clear description
+7. **Review carefully**: Refactoring PRs need careful review
+8. **Merge**: Merge after thorough review
+
+### Documentation Updates
+
+1. **Create branch**: `git checkout -b docs/description`
+2. **Update docs**: Make documentation changes
+3. **Review clarity**: Ensure documentation is clear
+4. **Create PR**: Create PR for documentation
+5. **Review**: Documentation PRs still need review
+6. **Merge**: Merge after approval
+
+## 11. Tools and Commands
+
+### Essential Git Commands for Workflow
+
+**Branch management:**
+```bash
+# Create and switch to new branch
+git checkout -b feature/feature-name
+
+# Switch to existing branch
+git checkout branch-name
+
+# List branches
+git branch
+
+# Delete local branch
+git branch -d branch-name
+
+# Delete remote branch
+git push origin --delete branch-name
+```
+
+**Syncing with main:**
+```bash
+# Fetch latest changes
+git fetch origin
+
+# Update local main
+git checkout main
+git pull origin main
+
+# Update feature branch from main
+git checkout feature/feature-name
+git merge main
+# or
+git rebase main
+```
+
+**Committing:**
+```bash
+# Stage changes
+git add .
+
+# Stage specific files
+git add path/to/file
+
+# Commit with message
+git commit -m "feat: Add new feature"
+
+# Amend last commit
+git commit --amend
+
+# View status
+git status
+
+# View diff
+git diff
+```
+
+**Pushing:**
+```bash
+# Push branch to remote
+git push origin feature/feature-name
+
+# Push and set upstream
+git push -u origin feature/feature-name
+
+# Force push (use with caution)
+git push --force-with-lease
+```
+
+### GitHub CLI Commands (if applicable)
+
+```bash
+# Create PR from command line
+gh pr create --title "feat: Add feature" --body "Description"
+
+# List PRs
+gh pr list
+
+# View PR
+gh pr view
+
+# Checkout PR
+gh pr checkout <number>
+
+# Merge PR
+gh pr merge <number>
+```
+
+### Branch Management Commands
+
+```bash
+# List all branches (local and remote)
+git branch -a
+
+# List remote branches
+git branch -r
+
+# Delete merged branches
+git branch --merged | grep -v "\*\|main\|master" | xargs -n 1 git branch -d
+
+# Prune remote branches
+git remote prune origin
+```
+
+### Testing Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- path/to/test.file.ts
+
+# Run tests matching pattern
+npm test -- --testNamePattern "pattern"
+```
+
+### Linting Commands
+
+```bash
+# Check for linting errors
+npm run lint
+
+# Fix auto-fixable issues
+npm run lint -- --fix
+
+# Lint specific file
+npm run lint -- path/to/file.ts
+```
+
+### Build Commands
+
+```bash
+# Production build
+npm run build
+
+# Development build (if applicable)
+npm run build:dev
+
+# Start production server
+npm start
+
+# Start development server
+npm run dev
+```
+
+## 12. Best Practices Summary
+
+### Keeping Branches Up to Date with Main
+
+- **Regular syncing**: Sync feature branch with main regularly
+- **Before PR**: Always sync before creating PR
+- **During PR**: Sync if main has new commits
+- **Methods**: Use merge or rebase (be consistent)
+- **Avoid conflicts**: Regular syncing prevents large conflicts
+
+### Small, Frequent Commits
+
+- **Logical units**: Each commit should be a logical unit of work
+- **One change**: One change per commit
+- **Clear messages**: Clear commit messages
+- **Reviewable**: Commits should be easy to review
+- **Revertable**: Small commits are easier to revert
+
+### Clear Communication in PRs
+
+- **Descriptive titles**: Clear, descriptive PR titles
+- **Complete descriptions**: Include all relevant information
+- **Link issues**: Link related issues and tickets
+- **Screenshots**: Include screenshots for UI changes
+- **Context**: Provide context for reviewers
+
+### Fast Feedback Loops
+
+- **Early PRs**: Create PRs early, even as drafts
+- **Small PRs**: Small PRs get faster reviews
+- **CI checks**: Fast CI provides quick feedback
+- **Quick reviews**: Review PRs promptly
+- **Address feedback**: Respond to feedback quickly
+
+### Maintaining Main Branch Health
+
+- **Always deployable**: Main should always be deployable
+- **No broken builds**: Fix broken builds immediately
+- **No failing tests**: All tests must pass
+- **Clean history**: Keep git history clean
+- **Regular deploys**: Deploy regularly from main
+
+## 13. Examples and Patterns
+
+### Good vs Bad Commit Message Examples
+
+**✅ Good commit messages:**
+
+```
+feat(auth): Add OAuth2 authentication with Google provider
+
+Implement Google OAuth2 authentication flow.
+- Add OAuth2 client configuration
+- Create authentication callback handler
+- Store user session in database
+- Add login/logout UI components
+
+Closes #123
+```
+
+```
+fix(api): Handle null user response in getUser endpoint
+
+Add null check before accessing user properties to prevent
+500 errors when user is not found. Return 404 instead.
+
+Fixes #456
+```
+
+```
+docs: Update API documentation with new endpoints
+
+Add documentation for:
+- POST /api/users
+- GET /api/users/:id
+- PUT /api/users/:id
+
+Related to #789
+```
+
+**❌ Bad commit messages:**
+
+```
+Update code
+```
+
+```
+fix
+```
+
+```
+WIP
+```
+
+```
+changes
+```
+
+```
+feat: stuff
+- did things
+- more stuff
+- fixes
+```
+
+### Good vs Bad PR Description Examples
+
+**✅ Good PR description:**
+
+```markdown
+## Description
+This PR adds user authentication using OAuth2 with Google and GitHub providers.
+
+## Type of Change
+- [x] New feature
+- [ ] Bug fix
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Related Issues
+Closes #123
+Related to #456
+
+## Changes Made
+- Implemented OAuth2 client configuration
+- Added authentication callback handlers
+- Created user session management
+- Added login/logout UI components
+- Updated API routes for authentication
+
+## Testing
+- [x] Unit tests added/updated
+- [x] Integration tests added/updated
+- [x] Manual testing performed
+- [x] All tests pass locally
+
+## Screenshots
+[Include screenshots of UI changes]
+
+## Checklist
+- [x] Code follows project style guidelines
+- [x] Self-review completed
+- [x] Comments added for complex code
+- [x] Documentation updated
+- [x] No new warnings generated
+- [x] Tests added/updated and passing
+```
+
+**❌ Bad PR description:**
+
+```markdown
+Added auth
+```
+
+```markdown
+## Description
+Stuff
+```
+
+```markdown
+WIP
+```
+
+### Example PR Titles
+
+**✅ Good PR titles:**
+- `feat: Add user authentication with OAuth2`
+- `fix: Resolve memory leak in image processing`
+- `docs: Update API documentation for v2`
+- `refactor: Simplify API response handling`
+- `test: Add unit tests for user service`
+
+**❌ Bad PR titles:**
+- `Update`
+- `Fixes`
+- `WIP`
+- `Changes`
+- `PR`
+
+### Example Branch Names
+
+**✅ Good branch names:**
+- `feature/user-authentication`
+- `bugfix/login-error-handling`
+- `hotfix/critical-security-patch`
+- `refactor/api-response-handling`
+- `docs/api-documentation-update`
+- `feat/PROJ-123-oauth-integration`
+
+**❌ Bad branch names:**
+- `feature`
+- `fix`
+- `new-feature`
+- `updates`
+- `branch1`
+- `test`
+
+### Example CI Workflow Configuration
+
+**Basic CI workflow (`.github/workflows/ci.yml`):**
+
+```yaml
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linter
+        run: npm run lint
+      
+      - name: Run tests
+        run: npm test -- --coverage
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+```
+
+### Common Mistakes to Avoid
+
+**❌ Don't:**
+- Commit directly to `main` branch
+- Create large, monolithic PRs
+- Skip tests or linting
+- Merge PRs with failing CI
+- Force push to `main`
+- Leave branches unmerged for weeks
+- Write vague commit messages
+- Create PRs without descriptions
+- Ignore review feedback
+- Merge your own PRs without review
+- Commit secrets or credentials
+- Leave TODO comments without issue links
+- Create branches with unclear names
+- Skip syncing with `main`
+- Deploy without testing
+
+**✅ Do:**
+- Always create feature branches
+- Keep PRs small and focused
+- Run tests and linting before PR
+- Wait for CI to pass before merging
+- Use descriptive branch names
+- Write clear commit messages
+- Provide complete PR descriptions
+- Respond to review feedback
+- Sync regularly with `main`
+- Delete merged branches
+- Test thoroughly before deploying
+- Document complex changes
+- Link issues in PRs
+- Follow naming conventions
+- Maintain code quality
+
+---
+
+## Quick Reference Checklist
+
+### Before Creating a PR
+- [ ] Branch is up to date with `main`
+- [ ] All tests pass locally
+- [ ] Linting passes
+- [ ] Build succeeds
+- [ ] Commit messages follow conventions
+- [ ] PR description is complete
+- [ ] Related issues are linked
+- [ ] Self-review completed
+
+### During PR Review
+- [ ] Code works as intended
+- [ ] Tests are adequate
+- [ ] Code is readable and maintainable
+- [ ] Documentation is updated
+- [ ] No security concerns
+- [ ] Performance is acceptable
+- [ ] Follows project conventions
+
+### Before Merging
+- [ ] At least one approval
+- [ ] All CI checks pass
+- [ ] Branch is up to date
+- [ ] All conversations resolved
+- [ ] PR description is accurate
+- [ ] Related issues are closed/linked
+
+### After Merging
+- [ ] Delete feature branch
+- [ ] Verify deployment
+- [ ] Update documentation if needed
+- [ ] Communicate changes to team
+
+---
+
+**Remember**: The goal of GitHub Flow is to maintain a simple, efficient workflow that keeps `main` always deployable while enabling fast iteration and collaboration.

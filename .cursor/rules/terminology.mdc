@@ -1,0 +1,204 @@
+---
+description: Domain-specific terms, business logic concepts, acronyms, and entity relationships
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Terminology and Domain Concepts
+
+## Domain Terms
+
+_This section should be customized based on your specific project domain. Below are examples and a template structure._
+
+### Core Entities
+
+**User**
+- Represents an authenticated user in the system
+- Has profile information, preferences, and permissions
+- Related entities: Profile, Session, Role
+
+**Product**
+- Represents a sellable item or service
+- Has pricing, inventory, and metadata
+- Related entities: Category, Review, Order
+
+**Order**
+- Represents a purchase transaction
+- Contains line items, payment information, and status
+- Related entities: User, Product, Payment
+
+### Business Logic Concepts
+
+**Feature Flags**
+- Toggle features on/off without code deployment
+- Managed via environment variables or feature flag service
+- Used for gradual rollouts and A/B testing
+
+**Rate Limiting**
+- Restrict number of requests per user/IP
+- Prevents abuse and ensures fair usage
+- Applied to API endpoints and sensitive operations
+
+**Caching Strategy**
+- Static content: Long cache times
+- Dynamic content: Short cache times or no cache
+- User-specific: No cache or per-user cache keys
+
+### Acronyms
+
+**API**: Application Programming Interface
+**CRUD**: Create, Read, Update, Delete
+**CSRF**: Cross-Site Request Forgery
+**JWT**: JSON Web Token
+**ORM**: Object-Relational Mapping
+**REST**: Representational State Transfer
+**SSR**: Server-Side Rendering
+**SSG**: Static Site Generation
+**ISR**: Incremental Static Regeneration
+
+### Technical Terms
+
+**Server Action**
+- Next.js feature for server-side mutations
+- Type-safe, progressive enhancement support
+- Preferred over API routes for internal operations
+
+**Server Component**
+- React component that renders on the server
+- Default in Next.js App Router
+- Reduces client-side JavaScript bundle
+
+**Client Component**
+- React component that renders on the client
+- Required for interactivity, hooks, browser APIs
+- Marked with `"use client"` directive
+
+**Zod Schema**
+- Runtime validation schema
+- Provides TypeScript type inference
+- Used for form validation and API validation
+
+**Prisma Migration**
+- Database schema change script
+- Version-controlled database changes
+- Always use migrations, never edit database directly
+
+### Entity Relationships
+
+_Define relationships between entities in your domain:_
+
+```
+User
+  ├── has many Orders
+  ├── has one Profile
+  └── has many Sessions
+
+Product
+  ├── belongs to Category
+  ├── has many Reviews
+  └── has many OrderItems
+
+Order
+  ├── belongs to User
+  ├── has many OrderItems
+  └── has one Payment
+```
+
+## Project-Specific Terms
+
+_Customize this section for your project:_
+
+### Feature Names
+
+- **Auth**: Authentication and authorization
+- **Products**: Product catalog and management
+- **Users**: User management and profiles
+- **Orders**: Order processing and management
+
+### Status Values
+
+**User Status:**
+- `active`: User can access the system
+- `inactive`: User account is disabled
+- `pending`: User registration pending verification
+
+**Order Status:**
+- `pending`: Order created, awaiting payment
+- `processing`: Payment received, order being prepared
+- `shipped`: Order has been shipped
+- `delivered`: Order has been delivered
+- `cancelled`: Order has been cancelled
+
+### Error Codes
+
+**Validation Errors:**
+- `VALIDATION_ERROR`: Input validation failed
+- `REQUIRED_FIELD`: Required field is missing
+- `INVALID_FORMAT`: Field format is invalid
+
+**Business Logic Errors:**
+- `INSUFFICIENT_STOCK`: Not enough inventory
+- `UNAUTHORIZED`: User lacks required permissions
+- `NOT_FOUND`: Resource does not exist
+
+## Naming Conventions Reference
+
+### Database Models (Prisma)
+
+- PascalCase, singular: `User`, `Product`, `Order`
+- Relationships: `user`, `products`, `orderItems`
+
+### API Endpoints
+
+- RESTful: `/api/users`, `/api/users/:id`
+- Actions: Server Actions, not REST endpoints (preferred)
+
+### Environment Variables
+
+- UPPER_SNAKE_CASE: `DATABASE_URL`, `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_*` prefix for client-accessible variables
+
+## Common Patterns
+
+### Feature Structure
+
+Each feature follows this pattern:
+- `_actions/`: Server Actions for mutations
+- `_components/`: UI components
+- `_hooks/`: React hooks
+- `_lib/`: Utilities and helpers
+- `_schemas/`: Zod validation schemas
+- `_types/`: TypeScript type definitions
+
+### Validation Flow
+
+1. Client-side validation (Zod schema)
+2. Server-side validation (Zod schema)
+3. Business logic validation
+4. Database constraints
+
+### Error Handling Flow
+
+1. Validate input (Zod)
+2. Check business rules
+3. Perform operation
+4. Handle errors gracefully
+5. Return user-friendly messages
+
+## Glossary
+
+**Feature**: A self-contained module with related functionality (e.g., authentication, products)
+
+**Server Action**: Next.js function that runs on the server, called from client components
+
+**Zod Schema**: Validation schema that provides runtime validation and TypeScript types
+
+**Prisma Client**: Type-safe database client generated from Prisma schema
+
+**Migration**: Database schema change script managed by Prisma
+
+**Revalidation**: Process of invalidating Next.js cache after data mutations
+
+**Route Group**: Next.js folder organization that doesn't affect URL structure (parentheses)
+
+**Private Folder**: Next.js folder prefixed with `_` that's excluded from routing
