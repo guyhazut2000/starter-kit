@@ -242,28 +242,30 @@ Related to #456
 **FOR EVERY FEATURE OR TASK, YOU MUST:**
 
 1. **Start from master/main**:
+
    ```bash
    # Switch to master/main
    git checkout master
    # OR
    git checkout main
-   
+
    # Pull latest code
    git pull origin master
    # OR
    git pull origin main
-   
+
    # Verify you're up to date
    git status
    ```
 
 2. **Create new branch FROM master/main**:
+
    ```bash
    # Create and switch to new branch from master
    git checkout -b feature/feature-name master
    # OR
    git checkout -b feature/feature-name main
-   
+
    # Verify you're on the new branch
    git branch --show-current
    ```
@@ -326,6 +328,7 @@ git push origin feature/feature-name
 ```
 
 **Alternative: Rebase (if preferred)**
+
 ```bash
 git checkout feature/feature-name
 git fetch origin
@@ -335,6 +338,99 @@ git push origin feature/feature-name --force-with-lease
 ```
 
 **⚠️ IMPORTANT**: Always sync with master/main BEFORE creating PR to avoid conflicts.
+
+### ⚠️ MANDATORY: Post-Merge Workflow (ALWAYS Follow This)
+
+**AFTER A PR IS MERGED ON GITHUB, YOU MUST:**
+
+1. **Switch back to master/main**:
+
+   ```bash
+   # Switch to master/main
+   git checkout master
+   # OR
+   git checkout main
+   ```
+
+2. **Pull the merged changes from remote**:
+
+   ```bash
+   # Pull latest changes (including your merged PR)
+   git pull origin master
+   # OR
+   git pull origin main
+
+   # Verify you're up to date
+   git status
+   git log --oneline -5  # See recent commits
+   ```
+
+3. **Optional: Clean up local feature branch**:
+
+   ```bash
+   # Delete the local feature branch (it's already merged)
+   git branch -d feature/feature-name
+
+   # If branch was force-pushed or has diverged, use -D to force delete
+   # git branch -D feature/feature-name
+   ```
+
+4. **Verify you're ready for next feature**:
+
+   ```bash
+   # Confirm you're on master/main
+   git branch --show-current
+
+   # Confirm you're up to date
+   git status
+   ```
+
+5. **Start next feature**: Now you can create a new branch from the updated master/main
+
+**Why This Is Critical:**
+
+- ✅ Ensures you always start new features from the latest code
+- ✅ Prevents working on outdated code
+- ✅ Keeps your local master/main in sync with remote
+- ✅ Avoids merge conflicts in future features
+- ✅ Maintains clean git history
+
+**⚠️ CRITICAL RULE**: **NEVER start a new feature without first pulling latest master/main after a merge.**
+
+### Complete Feature Workflow Summary
+
+**Full cycle from start to finish:**
+
+1. **Start Feature**:
+
+   ```bash
+   git checkout master
+   git pull origin master
+   git checkout -b feature/new-feature master
+   ```
+
+2. **Work on Feature**:
+
+   - Make commits
+   - Push to remote
+   - Create PR
+
+3. **After PR Merged** (on GitHub):
+
+   ```bash
+   git checkout master
+   git pull origin master
+   git branch -d feature/new-feature  # cleanup
+   ```
+
+4. **Start Next Feature**:
+   ```bash
+   git checkout master  # Already up to date from step 3
+   git pull origin master  # Double-check
+   git checkout -b feature/next-feature master
+   ```
+
+**Remember**: Always be up to date with master branch before starting any new work.
 
 ### Pushing Changes
 
