@@ -42,7 +42,7 @@ alwaysApply: true
 **Example Server Action with Zod:**
 
 ```typescript
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts (note: -action postfix in filename)
 "use server";
 
 import { z } from "zod";
@@ -240,7 +240,7 @@ export default async function Page() {
 ├── features/                # Feature-based organization
 │   ├── auth/                # Authentication feature
 │   │   ├── _actions/        # Server Actions for auth
-│   │   │   └── auth-actions.ts
+│   │   │   └── auth-action.ts
 │   │   ├── _components/     # Auth-specific components
 │   │   │   ├── LoginForm.tsx
 │   │   │   └── SignupForm.tsx
@@ -254,7 +254,7 @@ export default async function Page() {
 │   │       └── auth.ts
 │   ├── products/             # Products feature
 │   │   ├── _actions/
-│   │   │   └── product-actions.ts
+│   │   │   └── product-action.ts
 │   │   ├── _components/
 │   │   │   ├── ProductCard.tsx
 │   │   │   └── ProductList.tsx
@@ -268,7 +268,7 @@ export default async function Page() {
 │   │       └── product.ts
 │   └── users/                # Users feature
 │       ├── _actions/
-│       │   └── user-actions.ts
+│       │   └── user-action.ts
 │       ├── _components/
 │       │   └── UserProfile.tsx
 │       ├── _hooks/
@@ -554,7 +554,7 @@ export function handleError(error: unknown) {
 }
 
 // In Server Action (feature-specific)
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts
 ("use server");
 
 import { handleError } from "@/lib/utils";
@@ -598,7 +598,7 @@ export default async function ProductsPage() {
 ### Server Actions for Mutations
 
 ```typescript
-// features/products/_actions/product-actions.ts
+// features/products/_actions/product-action.ts
 "use server";
 
 import { z } from "zod";
@@ -702,7 +702,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 ### Type Safety with Server Actions
 
 ```typescript
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts
 "use server";
 
 export async function createUser(
@@ -925,7 +925,7 @@ export const updateUserSchema = userSchema.partial().required({ id: true });
 **Always validate with Zod in Server Actions:**
 
 ```typescript
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts
 "use server";
 
 import { z } from "zod";
@@ -1098,7 +1098,7 @@ export function parseFormData<T>(formData: FormData, schema: z.ZodSchema<T>) {
 }
 
 // Usage in Server Action
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts
 import { parseFormData } from "@/features/users/_lib/form-utils";
 import { createUserSchema } from "@/features/users/_schemas/user-schema";
 
@@ -1269,7 +1269,7 @@ describe("ProductCard", () => {
 **Example Server Action Test:**
 
 ```typescript
-// features/users/_actions/user-actions.test.ts
+// features/users/_actions/user-action.test.ts
 import { createUser } from "./user-actions";
 import { prisma } from "@/lib/prisma";
 
@@ -1504,7 +1504,7 @@ const user = await prisma.user.create({
 **Prefer Server Actions for database operations:**
 
 ```typescript
-// features/users/_actions/user-actions.ts
+// features/users/_actions/user-action.ts
 "use server";
 
 import { z } from "zod";
@@ -1711,7 +1711,7 @@ export function ContactForm() {
   );
 }
 
-// features/contact/_actions/contact-actions.ts
+// features/contact/_actions/contact-action.ts
 ("use server");
 
 import { z } from "zod";
