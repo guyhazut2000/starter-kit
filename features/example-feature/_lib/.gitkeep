@@ -1,0 +1,9 @@
+# Feature Utilities
+
+Place all utility functions and helpers for this feature here.
+
+Example: `user-utils.ts`, `product-helpers.ts`
+
+## Before Creating PR
+
+Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

@@ -1,0 +1,9 @@
+# Feature Components
+
+Place all components specific to this feature here.
+
+Example: `UserCard.tsx`, `ProductList.tsx`
+
+## Before Creating PR
+
+Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

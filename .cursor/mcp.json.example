@@ -1,0 +1,105 @@
+{
+  "mcpServers": {
+    "Prisma-Local": {
+      "command": "npx",
+      "args": ["-y", "prisma", "mcp"],
+      "description": "Prisma database operations, migrations, and schema management"
+    },
+    "Prisma-Remote": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
+      "description": "Remote Prisma MCP server for shared/production environments"
+    },
+    "Shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"],
+      "description": "Shadcn UI component registry - access components, props, and install components"
+    },
+    "Next-DevTools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"],
+      "description": "Next.js DevTools integration - fetch routes, logs, and metadata from running dev server"
+    },
+    "GitHub": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "description": "GitHub API access - search code, fetch issues, PRs, and repository information"
+    },
+    "Filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "ALLOWED_DIRECTORIES": "."
+      },
+      "description": "Filesystem access - read and write files within allowed directories"
+    },
+    "Brave-Search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": ""
+      },
+      "description": "Brave Search API - web search capabilities for your AI assistant"
+    },
+    "Fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "HTTP fetch capabilities - make web requests and fetch resources"
+    },
+    "Puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "description": "Browser automation - take screenshots, scrape web pages, automate browser interactions"
+    },
+    "PostgreSQL": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": ""
+      },
+      "description": "Direct PostgreSQL database access - query and manage database directly"
+    },
+    "Docker": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "description": "Docker operations - manage containers, images, and Docker Compose"
+    },
+    "npm": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-npm"],
+      "description": "npm registry access - search packages, get package information, and check versions"
+    },
+    "Memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory storage - store and retrieve information across sessions"
+    },
+    "SQLite": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite"],
+      "env": {
+        "SQLITE_DB_PATH": "./data/database.db"
+      },
+      "description": "SQLite database access - lightweight database operations"
+    },
+    "Stripe": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-stripe"],
+      "env": {
+        "STRIPE_API_KEY": ""
+      },
+      "description": "Stripe payment operations - manage payments, subscriptions, and invoices"
+    },
+    "Figma": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-figma"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": ""
+      },
+      "description": "Figma API access - read design data, components, and styles"
+    }
+  }
+}
