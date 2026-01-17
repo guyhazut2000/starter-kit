@@ -42,8 +42,10 @@ next-env.d.ts
 
 # Prisma generated files (do not commit - regenerate with `npx prisma generate`)
 /app/generated/prisma
-/lib/generated/prisma
 
 # logs
 /logs
 *.log
+
+# MCP configuration (contains API tokens - do not commit)
+.cursor/mcp.json
