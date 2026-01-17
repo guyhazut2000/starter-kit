@@ -19,8 +19,14 @@ alwaysApply: true
 - camelCase with `use` prefix for hooks: `useAuth.ts`, `useProducts.ts`
 
 **Server Actions:**
-- kebab-case: `user-actions.ts`, `product-actions.ts`
-- Descriptive action names: `create-user.ts`, `update-product.ts`
+- **File naming**: All Server Action files must use the `-action` postfix
+  - ✅ `user-action.ts`, `product-action.ts`, `auth-action.ts`
+  - ✅ Individual action files: `login-password-action.ts`, `send-otp-action.ts`
+  - ❌ `user-actions.ts`, `product-actions.ts` (no postfix)
+  - Files are in `_actions/` folders, but the `-action` postfix makes it clear these are action files
+- **Function naming**: Use clean, descriptive names without postfix (functions are already in action files)
+  - ✅ `loginWithPassword`, `createUser`, `sendOTP`
+  - ❌ `loginWithPasswordAction`, `createUserAction` (redundant since file already indicates it's an action)
 
 **Zod Schemas:**
 - kebab-case: `user-schema.ts`, `product-schema.ts`
@@ -118,7 +124,7 @@ import { formatDate } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
 // 4. Feature imports
-import { createUser } from "@/features/users/_actions/user-actions";
+import { createUser } from "@/features/users/_actions/user-action";
 import type { User } from "@/features/users/_types/user";
 import { UserCard } from "@/features/users/_components/UserCard";
 
@@ -226,6 +232,7 @@ export function Component({ prop }: ComponentProps) {
 
 **Server Actions:**
 ```typescript
+// File: features/users/_actions/user-action.ts
 "use server";
 
 export async function createUser(formData: FormData) {
@@ -256,6 +263,10 @@ export async function createUser(formData: FormData) {
   }
 }
 ```
+
+**Note:** 
+- **File names** must use the `-action` postfix (e.g., `user-action.ts`, `login-password-action.ts`)
+- **Function names** should be clean and descriptive without postfix (e.g., `createUser`, `loginWithPassword`) since the file name already indicates it's an action
 
 **Error Boundaries:**
 - Use `error.tsx` files for route-level error boundaries
