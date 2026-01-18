@@ -62,8 +62,7 @@ export function LoginForm({ redirectUrl = "/" }: LoginFormProps) {
         setError("Login failed. Please try again.");
         setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Login error:", err);
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }

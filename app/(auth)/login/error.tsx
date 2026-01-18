@@ -1,11 +1,37 @@
 "use client";
 
+import { useEffect } from "react";
+
 interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
 }
 
+const USER_FACING_MESSAGE = "An unexpected error occurred. Please try again.";
+
 export default function LoginError({ error, reset }: ErrorProps) {
+  useEffect(() => {
+    const msg = error?.message;
+    const stack = error?.stack;
+    const digest = error?.digest;
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("[LoginError]", { message: msg, stack, digest }, error);
+      return;
+    }
+
+    fetch("/api/log-client-error", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: msg ?? "Unknown",
+        stack: stack ?? undefined,
+        digest: digest ?? undefined,
+        source: "LoginError",
+      }),
+    }).catch(() => {});
+  }, [error]);
+
   return (
     <div className="flex min-h-screen flex-col bg-linear-to-b from-neutral-50 to-neutral-100/80 dark:from-neutral-950 dark:to-neutral-900/50">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -32,7 +58,7 @@ export default function LoginError({ error, reset }: ErrorProps) {
                 Something went wrong
               </h2>
               <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                {error.message || "An unexpected error occurred. Please try again."}
+                {USER_FACING_MESSAGE}
               </p>
               <button
                 onClick={reset}
