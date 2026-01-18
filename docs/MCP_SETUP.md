@@ -11,15 +11,17 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Core Development Tools
 
 #### Prisma-Local
+
 - **Purpose**: Database operations, migrations, and schema management
 - **Command**: `npx -y prisma mcp`
-- **Use Cases**: 
+- **Use Cases**:
   - Run database migrations
   - Check migration status
   - Inspect database schema
   - Generate Prisma Client
 
 #### Prisma-Remote
+
 - **Purpose**: Remote Prisma MCP server for shared/production environments
 - **Command**: `npx -y mcp-remote https://mcp.prisma.io/mcp`
 - **Use Cases**: Production database operations via remote server
@@ -27,6 +29,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### UI & Component Libraries
 
 #### Shadcn
+
 - **Purpose**: Shadcn UI component registry
 - **Command**: `npx shadcn@latest mcp`
 - **Use Cases**:
@@ -38,6 +41,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Next.js Integration
 
 #### Next-DevTools
+
 - **Purpose**: Next.js DevTools integration
 - **Command**: `npx -y next-devtools-mcp@latest`
 - **Use Cases**:
@@ -49,6 +53,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Version Control & Collaboration
 
 #### GitHub
+
 - **Purpose**: GitHub API access
 - **Command**: `npx -y @modelcontextprotocol/server-github`
 - **Environment Variables**:
@@ -62,6 +67,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### File System & Development
 
 #### Filesystem
+
 - **Purpose**: File system access
 - **Command**: `npx -y @modelcontextprotocol/server-filesystem`
 - **Environment Variables**:
@@ -74,6 +80,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Web & Search
 
 #### Brave-Search
+
 - **Purpose**: Web search capabilities
 - **Command**: `npx -y @modelcontextprotocol/server-brave-search`
 - **Environment Variables**:
@@ -84,6 +91,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
   - Research topics
 
 #### Fetch
+
 - **Purpose**: HTTP fetch capabilities
 - **Command**: `npx -y @modelcontextprotocol/server-fetch`
 - **Use Cases**:
@@ -92,6 +100,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
   - Interact with APIs
 
 #### Puppeteer
+
 - **Purpose**: Browser automation
 - **Command**: `npx -y @modelcontextprotocol/server-puppeteer`
 - **Use Cases**:
@@ -103,6 +112,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Database
 
 #### PostgreSQL
+
 - **Purpose**: Direct PostgreSQL database access
 - **Command**: `npx -y @modelcontextprotocol/server-postgres`
 - **Environment Variables**:
@@ -114,6 +124,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 - **Note**: Use with caution in production. Prefer Prisma for application code.
 
 #### SQLite
+
 - **Purpose**: SQLite database access
 - **Command**: `npx -y @modelcontextprotocol/server-sqlite`
 - **Environment Variables**:
@@ -126,6 +137,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Containerization & DevOps
 
 #### Docker
+
 - **Purpose**: Docker operations
 - **Command**: `npx -y @modelcontextprotocol/server-docker`
 - **Use Cases**:
@@ -137,6 +149,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Package Management
 
 #### npm
+
 - **Purpose**: npm registry access
 - **Command**: `npx -y @modelcontextprotocol/server-npm`
 - **Use Cases**:
@@ -148,6 +161,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Memory & Storage
 
 #### Memory
+
 - **Purpose**: Persistent memory storage
 - **Command**: `npx -y @modelcontextprotocol/server-memory`
 - **Use Cases**:
@@ -158,6 +172,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
 ### Third-Party Services
 
 #### Stripe
+
 - **Purpose**: Stripe payment operations
 - **Command**: `npx -y @modelcontextprotocol/server-stripe`
 - **Environment Variables**:
@@ -169,6 +184,7 @@ Model Context Protocol (MCP) is an open protocol that allows AI assistants and t
   - Payment analytics
 
 #### Figma
+
 - **Purpose**: Figma API access
 - **Command**: `npx -y @modelcontextprotocol/server-figma`
 - **Environment Variables**:
@@ -215,6 +231,7 @@ FIGMA_ACCESS_TOKEN=your_figma_token_here
 The MCP configuration file is located at `.cursor/mcp.json` in this project.
 
 For Cursor IDE:
+
 - Project-level: `.cursor/mcp.json` (this file)
 - User-level: `~/.cursor/mcp.json` (your home directory)
 

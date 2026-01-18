@@ -5,24 +5,13 @@ import { getSessionCookie } from "better-auth/cookies";
  * Public routes that don't require authentication
  * Note: "/" is handled separately - it redirects based on auth status
  */
-const publicRoutes = [
-  "/login",
-  "/signup",
-  "/sign-in",
-  "/sign-up",
-  "/api/auth",
-];
+const publicRoutes = ["/login", "/signup", "/sign-in", "/sign-up", "/api/auth"];
 
 /**
  * Protected routes that require authentication
  * Add your protected routes here
  */
-const protectedRoutes = [
-  "/dashboard",
-  "/account",
-  "/profile",
-  "/settings",
-];
+const protectedRoutes = ["/dashboard", "/account", "/profile", "/settings"];
 
 /**
  * Check if a path is a public route
@@ -56,7 +45,7 @@ function hasSessionCookie(request: NextRequest): boolean {
 /**
  * Proxy function that runs before route handling
  * Handles public and protected route logic
- * 
+ *
  * Note: In Next.js 16+, middleware.ts is deprecated and replaced with proxy.ts
  * Proxy always runs on Node.js runtime (not Edge)
  */
@@ -77,7 +66,12 @@ export function proxy(request: NextRequest) {
   // Allow public routes and static assets
   if (isPublicRoute(pathname)) {
     // If user is authenticated and tries to access login/signup, redirect to dashboard
-    if (pathname === "/login" || pathname === "/signup" || pathname === "/sign-in" || pathname === "/sign-up") {
+    if (
+      pathname === "/login" ||
+      pathname === "/signup" ||
+      pathname === "/sign-in" ||
+      pathname === "/sign-up"
+    ) {
       if (hasSessionCookie(request)) {
         // User is logged in, redirect to dashboard
         return NextResponse.redirect(new URL("/dashboard", request.url));

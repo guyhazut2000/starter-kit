@@ -1,0 +1,136 @@
+---
+description: Mandatory local quality gates - run testing, linting, formatting, type check, and build BEFORE every push, PR, and merge. Never push bad code.
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Pre-Push and Pre-PR Local Quality Gates
+
+## 🚨 CRITICAL RULE: NEVER PUSH WITHOUT RUNNING LOCAL CHECKS
+
+**You MUST run all quality checks in your local environment before:**
+- Pushing to a feature branch
+- Creating a pull request
+- Requesting review
+- Merging (ensure your branch still passes after syncing with main)
+
+**Do not push code that fails these checks. Fix failures locally first.**
+
+---
+
+## Required Checks (Match CI Pipeline)
+
+These checks mirror what runs in CI (`.github/workflows/ci.yml`). If they pass locally, CI is more likely to pass.
+
+### 1. Formatting (Prettier)
+
+```bash
+npm run format:check
+```
+
+- **Fix issues:** `npm run format`
+
+### 2. Linting (ESLint)
+
+```bash
+npm run lint
+```
+
+- **Fix issues:** `npm run lint -- --fix` (for auto-fixable rules)
+
+### 3. Type Check (TypeScript)
+
+```bash
+npx tsc --noEmit
+```
+
+- Fix any type errors before pushing.
+
+### 4. Tests
+
+```bash
+npm test
+```
+
+- Or use `npm run test:ci` to match CI (coverage, no watch).
+- Ensure tests pass; fix or update tests if they fail.
+
+### 5. Build
+
+```bash
+npm run build
+```
+
+- The app must build successfully. Set required env vars (e.g. `DATABASE_URL`) if needed.
+
+---
+
+## One-Command: Full Local Gate
+
+Run all of the above in one go **before every push**:
+
+```bash
+npm run prepush
+```
+
+This runs: **format:check → lint → tsc --noEmit → test → build**.
+
+If `prepush` fails, fix the reported errors and run it again. Do not push until it passes.
+
+---
+
+## Alternative: Step-by-Step
+
+If you prefer to run steps separately or `prepush` is not available:
+
+```bash
+# 1. Format, lint, type check (fast)
+npm run ci:check
+
+# 2. Tests
+npm test
+
+# 3. Build
+npm run build
+```
+
+---
+
+## When to Run These Checks
+
+| When | What to run |
+|------|-------------|
+| Before **every push** | `npm run prepush` (or `ci:check` + `npm test` + `npm run build`) |
+| Before **creating a PR** | Same as above, after syncing with main and resolving conflicts |
+| After **merging main into your branch** | Same as above, to ensure merge did not break anything |
+| Before **requesting PR review** | Same as above |
+
+---
+
+## Integration with GitHub Flow
+
+1. **After you finish your feature:** Run `npm run prepush`. Fix any failure.
+2. **After syncing with main** (`git merge origin/main`): Run `npm run prepush` again.
+3. **Then push:** `git push origin feature/your-branch`.
+4. **Then create the PR.**
+
+See `github_flow.mdc` for the full branch and PR workflow.
+
+---
+
+## If a Check Fails
+
+- **format:check:** Run `npm run format`, then re-run `prepush`.
+- **lint:** Fix reported files; use `npm run lint -- --fix` when applicable.
+- **tsc:** Resolve type errors; do not use `// @ts-ignore` to bypass.
+- **test:** Fix failing tests or adjust code; do not skip or delete tests to pass.
+- **build:** Fix build errors (imports, env, config); ensure `DATABASE_URL` etc. are set if required.
+
+---
+
+## Summary
+
+- ✅ **ALWAYS** run `npm run prepush` (or equivalent) before pushing.
+- ✅ **ALWAYS** fix all failures locally before pushing.
+- ❌ **NEVER** push knowing that formatting, lint, type check, tests, or build fail.
+- ❌ **NEVER** rely only on CI to find these issues; catch them locally first.

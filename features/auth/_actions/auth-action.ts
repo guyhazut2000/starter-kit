@@ -8,9 +8,7 @@ import type { AuthResult } from "@/features/auth/_types/auth";
  * Note: Better Auth handles the actual authentication via its API routes.
  * This action is for server-side validation only.
  */
-export async function validateLogin(
-  formData: FormData
-): Promise<AuthResult<{ email: string }>> {
+export async function validateLogin(formData: FormData): Promise<AuthResult<{ email: string }>> {
   const rawData = {
     email: formData.get("email"),
     password: formData.get("password"),

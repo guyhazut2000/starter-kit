@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Prisma generated client (created by `prisma generate`, do not lint)
+    "app/generated/**",
     // Test files - allow img elements in test mocks
     "**/__tests__/**",
     "**/*.test.{ts,tsx}",

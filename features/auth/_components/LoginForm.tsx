@@ -15,9 +15,7 @@ export function LoginForm({ redirectUrl = "/" }: LoginFormProps) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<
-    Record<string, string[]>
-  >({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -143,9 +141,7 @@ export function LoginForm({ redirectUrl = "/" }: LoginFormProps) {
           className="rounded-md border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/40 dark:bg-red-950/50"
           role="alert"
         >
-          <p className="text-sm font-medium text-red-800 dark:text-red-200">
-            {error}
-          </p>
+          <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
         </div>
       )}
 

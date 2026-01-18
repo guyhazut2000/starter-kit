@@ -60,6 +60,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-  await prisma.$disconnect();
-  await pool.end();
-});
+    await prisma.$disconnect();
+    await pool.end();
+  });

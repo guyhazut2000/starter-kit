@@ -7,6 +7,7 @@ This document outlines the workflow for developing new features, including the r
 ### 1. Start Feature Development
 
 1. Create a feature branch from `main`:
+
    ```bash
    git checkout -b feature/feature-name
    ```
@@ -80,6 +81,7 @@ If you find any issues:
 #### Step 4: Iterate
 
 Repeat Step 3 until:
+
 - All automated checks pass
 - All checklist items are checked
 - You're confident the feature is correct
@@ -89,6 +91,7 @@ Repeat Step 3 until:
 Once everything is reviewed and fixed:
 
 1. **Sync with Main**: Ensure your branch is up to date
+
    ```bash
    git fetch origin
    git merge main
@@ -107,6 +110,7 @@ Once everything is reviewed and fixed:
 ## Review Checklist Location
 
 The review checklist is located at:
+
 ```
 features/example-feature/FEATURE_REVIEW_CHECKLIST.md
 ```
@@ -116,26 +120,31 @@ When working on a new feature, copy this checklist to your feature folder or ref
 ## Common Issues to Watch For
 
 ### Architecture Issues
+
 - Code not organized in feature folders
 - Mixing server and client components unnecessarily
 - Using API routes instead of Server Actions
 
 ### Type Safety Issues
+
 - Missing type definitions
 - Using `any` type
 - Not deriving types from Zod schemas
 
 ### Validation Issues
+
 - Missing server-side validation
 - Not using Zod schemas
 - Exposing technical error details to users
 
 ### Performance Issues
+
 - Unnecessary client-side JavaScript
 - Missing loading states
 - Not using appropriate caching strategies
 
 ### Security Issues
+
 - Exposing secrets in client code
 - Missing input validation
 - Not handling errors properly
@@ -151,6 +160,7 @@ When working on a new feature, copy this checklist to your feature folder or ref
 ## Automation
 
 Consider setting up pre-commit hooks or CI checks for:
+
 - Linting
 - Type checking
 - Tests
