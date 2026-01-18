@@ -6,12 +6,12 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 jest.mock("next/navigation", () => ({
   useRouter(): AppRouterInstance {
     return {
-      push: jest.fn<AppRouterInstance["push"]>(),
-      replace: jest.fn<AppRouterInstance["replace"]>(),
-      prefetch: jest.fn<AppRouterInstance["prefetch"]>(),
-      back: jest.fn<AppRouterInstance["back"]>(),
-      forward: jest.fn<AppRouterInstance["forward"]>(),
-      refresh: jest.fn<AppRouterInstance["refresh"]>(),
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
       pathname: "/",
       query: {},
       asPath: "/",
@@ -27,6 +27,6 @@ jest.mock("next/navigation", () => ({
 
 // Mock environment variables for tests
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
-process.env.NODE_ENV = "test";
+(process.env as Record<string, string>).NODE_ENV = "test";
 process.env.LOG_LEVEL = "error";
 process.env.SKIP_ENV_VALIDATION = "true";

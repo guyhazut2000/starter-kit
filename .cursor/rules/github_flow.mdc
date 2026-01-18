@@ -68,12 +68,11 @@ alwaysApply: true
    # Should show "nothing to commit, working tree clean"
    ```
 
-4. **Test that merge works:**
+4. **Run full local quality gate (format, lint, type check, test, build):**
    ```bash
-   npm run lint
-   npm run build
-   npm test
+   npm run prepush
    ```
+   See **`pre-push-checks.mdc`** for details. Fix any failure before pushing.
 
 **❌ NEVER create a PR if `git log HEAD..origin/master` shows commits**
 **❌ NEVER create a PR if there are uncommitted changes**
@@ -81,22 +80,43 @@ alwaysApply: true
 
 **These rules ensure you can click "Merge" on GitHub without conflicts.**
 
+### ⚠️ RULE #3: ALWAYS RUN LOCAL CHECKS BEFORE PUSHING (Testing, Linting, Build)
+
+**BEFORE EVERY PUSH AND BEFORE CREATING A PR, YOU MUST run in your local environment:**
+
+```bash
+npm run prepush
+```
+
+This runs: **format check → lint → type check → tests → build**. All must pass.
+
+- **Before pushing:** Run `npm run prepush`. Do not push if it fails.
+- **Before creating a PR:** Run `npm run prepush` after syncing with main and resolving conflicts.
+- **After merging main into your branch:** Run `npm run prepush` again before pushing.
+
+**❌ NEVER push code that fails format, lint, type check, tests, or build**
+**✅ ALWAYS fix failures locally first** — do not rely on CI to catch them.
+
+See **`pre-push-checks.mdc`** for the full checklist, individual commands, and troubleshooting.
+
 ## 🎯 Quick Reference: The Golden Rule
 
 **FOR EVERY FEATURE/TASK:**
 1. ✅ Pull from master: `git checkout master && git pull origin master`
 2. ✅ Create NEW branch: `git checkout -b feature/name master`
 3. ✅ Work on feature
-4. ✅ Sync with master before PR: `git merge origin/master`
-5. ✅ Create PR to master
-6. ✅ Merge to master after approval
-7. ✅ Delete branch after merge
+4. ✅ Run `npm run prepush` (format, lint, type check, test, build) before pushing
+5. ✅ Sync with master before PR: `git merge origin/master`
+6. ✅ Run `npm run prepush` again after sync, then create PR to master
+7. ✅ Merge to master after approval
+8. ✅ Delete branch after merge
 
 **NEVER:**
 - ❌ Work on existing feature branches
 - ❌ Branch from another feature branch
 - ❌ Commit to master/main
 - ❌ Skip syncing with master before PR
+- ❌ Push without running `npm run prepush` (or equivalent local checks)
 - ❌ Force push to master
 
 ## ⚠️ CRITICAL: Mandatory Git Workflow for ALL Features/Tasks
@@ -138,8 +158,7 @@ git branch --show-current
 **STEP 3: Work on Feature**
 - Make your changes
 - Commit frequently with clear messages
-- Test your changes
-- Run linting and build checks
+- Test your changes; run `npm run prepush` (or `ci:check`, `npm test`, `npm run build`) before pushing
 
 **STEP 4: Before Creating PR (MANDATORY - See RULE #1 and RULE #2)**
 
@@ -168,11 +187,9 @@ git log HEAD..origin/master --oneline
 git status
 # Should show "nothing to commit, working tree clean"
 
-# 7. Run quality checks
-npm run lint
-npx tsc --noEmit
-npm run build
-npm test
+# 7. Run full local quality gate (format, lint, type check, test, build)
+npm run prepush
+# Fix any failure before pushing. See pre-push-checks.mdc.
 
 # 8. ONLY THEN push your branch
 git push -u origin feature/feature-name
@@ -200,6 +217,7 @@ git branch -d feature/feature-name
 3. **ALWAYS pull from master first** - Before creating any branch, ensure master is up to date
 4. **ALWAYS create branch from master** - Never branch from another feature branch
 5. **ALWAYS sync with master before PR** - Merge master into your branch before creating PR
+6. **ALWAYS run `npm run prepush` before pushing** - Format, lint, type check, test, and build must pass locally (see `pre-push-checks.mdc`)
 
 ### What to Do If You See Conflicts
 

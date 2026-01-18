@@ -627,6 +627,8 @@ This will automatically delete remote branches after PR merge, so you only need 
 
 ### Pushing Changes
 
+**Before every push:** Run `npm run prepush` (format, lint, type check, test, build). See `pre-push-checks.mdc`.
+
 ```bash
 # Push branch to remote
 git push origin feature/feature-name
@@ -654,6 +656,7 @@ git push --force-with-lease
 - ✅ Reference issues in commit messages
 - ✅ Keep commits small and focused
 - ✅ Test before committing
+- ✅ Run `npm run prepush` before pushing (see `pre-push-checks.mdc`)
 - ✅ Sync with main regularly
 - ✅ Review your own commits before pushing
 

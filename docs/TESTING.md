@@ -30,19 +30,20 @@ This document describes our testing approach for this SaaS project. Our main bra
 
 ## Test Types & Scope
 
-| Test Type | Goal | Examples / When to Write | Placement |
-|---|---|---|---|
-| **Unit Tests** | Validate individual functions/classes in isolation. Fast feedback. | Business logic, validation rules, utilities. Write *before* or alongside feature work. | Colocated with code: `lib/**/*.test.ts` |
-| **Component Tests** | Verify React components render and interact correctly. | UI components, forms, user interactions. | Colocated: `features/**/_components/**/*.test.tsx` |
-| **Integration Tests** | Verify components working together: modules, DB, APIs. | DB queries + data access; service-to-service calls; critical integrations. | Colocated: `features/**/_actions/**/*.test.ts` |
-| **Server Action Tests** | Validate server-side mutations and data operations. | Form submissions, database operations, validation. | Colocated: `features/**/_actions/**/*.test.ts` |
-| **Static & Lint Checks** | Catch syntax errors, enforce styles, find vulnerabilities. | Always in CI, on PRs. | N/A |
+| Test Type                | Goal                                                               | Examples / When to Write                                                               | Placement                                          |
+| ------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **Unit Tests**           | Validate individual functions/classes in isolation. Fast feedback. | Business logic, validation rules, utilities. Write _before_ or alongside feature work. | Colocated with code: `lib/**/*.test.ts`            |
+| **Component Tests**      | Verify React components render and interact correctly.             | UI components, forms, user interactions.                                               | Colocated: `features/**/_components/**/*.test.tsx` |
+| **Integration Tests**    | Verify components working together: modules, DB, APIs.             | DB queries + data access; service-to-service calls; critical integrations.             | Colocated: `features/**/_actions/**/*.test.ts`     |
+| **Server Action Tests**  | Validate server-side mutations and data operations.                | Form submissions, database operations, validation.                                     | Colocated: `features/**/_actions/**/*.test.ts`     |
+| **Static & Lint Checks** | Catch syntax errors, enforce styles, find vulnerabilities.         | Always in CI, on PRs.                                                                  | N/A                                                |
 
 ## Test File Locations
 
 ### Colocated Tests (Recommended)
 
 **Structure:**
+
 ```
 features/
   products/
@@ -61,6 +62,7 @@ features/
 ```
 
 **Benefits:**
+
 - Easy to find tests
 - Tests stay with code
 - Easy to delete when removing features
@@ -68,6 +70,7 @@ features/
 ### Separate Test Directory (Alternative)
 
 **Structure:**
+
 ```
 __tests__/
   features/
@@ -77,6 +80,7 @@ __tests__/
 ```
 
 **Use when:**
+
 - Test files are very large
 - Team prefers separate test directory
 - Tests need special organization
@@ -86,12 +90,14 @@ __tests__/
 ### ✅ DO Test
 
 **Server Components:**
+
 - Data fetching and rendering
 - Error handling and error boundaries
 - Loading states
 - Server-side logic and transformations
 
 **Client Components:**
+
 - User interactions (clicks, form submissions, input changes)
 - State management and updates
 - Event handlers
@@ -99,6 +105,7 @@ __tests__/
 - Accessibility (if applicable)
 
 **Server Actions:**
+
 - Input validation (Zod schema validation)
 - Success cases
 - Error handling
@@ -106,18 +113,21 @@ __tests__/
 - Database operations (mocked)
 
 **Hooks:**
+
 - State updates
 - Side effects
 - Return values
 - Error handling
 
 **Utilities:**
+
 - All utility functions
 - Edge cases and boundary conditions
 - Error handling
 - Type transformations
 
 **Forms:**
+
 - Form submission
 - Validation (client and server)
 - Error display
@@ -125,6 +135,7 @@ __tests__/
 - Field interactions
 
 **API Routes:**
+
 - Request validation
 - Response formats
 - Status codes
@@ -185,6 +196,7 @@ npm run build
 ```
 
 **Ensure:**
+
 - All tests pass locally
 - No skipped or disabled tests
 - Test coverage meets requirements (minimum 70%)
@@ -212,6 +224,7 @@ Our GitHub Actions CI workflow automatically runs:
    - Security audit
 
 **CI will fail if:**
+
 - Any test fails
 - Coverage drops below 70%
 - Linting errors exist
@@ -274,7 +287,7 @@ Our GitHub Actions CI workflow automatically runs:
 ```typescript
 describe("ComponentName", (): void => {
   // Setup (beforeEach, mocks, etc.)
-  
+
   describe("rendering", (): void => {
     it("renders correctly", (): void => {
       // Arrange
@@ -282,7 +295,7 @@ describe("ComponentName", (): void => {
       // Assert
     });
   });
-  
+
   describe("interactions", (): void => {
     it("handles click", async (): Promise<void> => {
       // Arrange
@@ -290,7 +303,7 @@ describe("ComponentName", (): void => {
       // Assert
     });
   });
-  
+
   describe("error handling", (): void => {
     it("handles errors gracefully", (): void => {
       // Arrange
@@ -304,6 +317,7 @@ describe("ComponentName", (): void => {
 ### Test Data
 
 **Create test fixtures:**
+
 ```typescript
 // features/products/_lib/__fixtures__/products.ts
 export const mockProduct = {
@@ -382,6 +396,7 @@ jest.mock("next/navigation", () => ({
 ## Example Tests
 
 See the example tests in:
+
 - `lib/__tests__/utils.test.ts` - Utility function example
 - `app/__tests__/page.test.tsx` - Component test example
 
@@ -403,6 +418,7 @@ These demonstrate the testing patterns and best practices for this project.
 ## Questions?
 
 If you have questions about testing, refer to:
+
 - `.cursor/rules/testing.mdc` - Detailed AI agent testing guidelines and patterns
 - `.cursor/rules/nextjs_architecture.mdc` - Architecture patterns
 - `.cursor/rules/github_flow.mdc` - Workflow and PR guidelines

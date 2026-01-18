@@ -15,10 +15,7 @@ const config: Config = {
     // Handle module aliases (this will be automatically configured for you based on your tsconfig.json paths)
     "^@/(.*)$": "<rootDir>/$1",
   },
-  testMatch: [
-    "**/__tests__/**/*.[jt]s?(x)",
-    "**/?(*.)+(spec|test).[jt]s?(x)",
-  ],
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
   collectCoverageFrom: [
     "app/**/*.{js,jsx,ts,tsx}",
     "features/**/*.{js,jsx,ts,tsx}",
@@ -41,10 +38,7 @@ const config: Config = {
   // Ignore patterns
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   // Transform ignore patterns
-  transformIgnorePatterns: [
-    "/node_modules/",
-    "^.+\\.module\\.(css|sass|scss)$",
-  ],
+  transformIgnorePatterns: ["/node_modules/", "^.+\\.module\\.(css|sass|scss)$"],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
