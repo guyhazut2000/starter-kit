@@ -1,12 +1,11 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { signupSchema } from "@/features/auth/schemas/auth-schema";
-import type { SignupValues } from "@/features/auth/schemas/auth-schema";
-
-export type SignupResult =
-  | { success: true }
-  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
+import {
+  signupSchema,
+  type SignupValues,
+  type SignupResult,
+} from "@/features/auth/schemas/auth-schema";
 
 /**
  * Validates signup input and calls Better Auth signUp.email.
@@ -17,10 +16,16 @@ export async function signUpWithEmail(values: SignupValues): Promise<SignupResul
 
   if (!parsed.success) {
     const flattened = parsed.error.flatten();
+    const fieldErrors: Record<string, string[]> = {};
+    for (const [key, value] of Object.entries(flattened.fieldErrors)) {
+      if (Array.isArray(value) && value.length > 0) {
+        fieldErrors[key] = value;
+      }
+    }
     return {
       success: false,
       error: "Please fix the errors below.",
-      fieldErrors: flattened.fieldErrors as Record<string, string[]>,
+      fieldErrors,
     };
   }
 

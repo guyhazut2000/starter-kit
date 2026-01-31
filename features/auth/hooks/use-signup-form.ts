@@ -5,22 +5,20 @@ import { useRouter } from "next/navigation";
 
 import { authRoutes } from "@/lib/routes";
 import { signUpWithEmail } from "@/features/auth/actions/signup-action";
-import type { SignupValues } from "@/features/auth/schemas/auth-schema";
+import {
+  signupInitialValues,
+  type SignupValues,
+} from "@/features/auth/schemas/auth-schema";
 
+/** Form state derived from schema — values, field errors, and global error. */
 export type SignupFormState = {
   values: SignupValues;
   fieldErrors: Record<string, string[]>;
   error: string | null;
 };
 
-const initialValues: SignupValues = {
-  name: "",
-  email: "",
-  password: "",
-};
-
 const initialState: SignupFormState = {
-  values: initialValues,
+  values: { ...signupInitialValues },
   fieldErrors: {},
   error: null,
 };
@@ -37,12 +35,15 @@ function signupFormReducer(
   action: SignupFormAction
 ): SignupFormState {
   switch (action.type) {
-    case "SET_FIELD":
+    case "SET_FIELD": {
+      const nextFieldErrors = { ...state.fieldErrors };
+      delete nextFieldErrors[action.field];
       return {
         ...state,
         values: { ...state.values, [action.field]: action.value },
-        fieldErrors: { ...state.fieldErrors, [action.field]: undefined },
+        fieldErrors: nextFieldErrors,
       };
+    }
     case "SET_FIELD_ERRORS":
       return { ...state, fieldErrors: action.fieldErrors };
     case "SET_ERROR":
