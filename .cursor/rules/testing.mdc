@@ -39,8 +39,8 @@ alwaysApply: true
 features/
   products/
     components/
-      ProductCard.tsx
-      ProductCard.test.tsx        # Colocated test
+      product-card.tsx
+      product-card.test.tsx        # Colocated test
     actions/
       product-actions.ts
       product-actions.test.ts     # Colocated test
