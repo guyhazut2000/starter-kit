@@ -1,9 +1,0 @@
-# Zod Schemas
-
-Place all Zod validation schemas for this feature here.
-
-Example: `user-schema.ts`, `product-schema.ts`
-
-## Before Creating PR
-
-Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

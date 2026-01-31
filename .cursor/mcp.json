@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "Prisma-Local": {
+      "command": "npx",
+      "args": ["-y", "prisma", "mcp"],
+      "description": "Prisma database operations, migrations, and schema management"
+    },
+    "Shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"],
+      "description": "Shadcn UI component registry - access components, props, and install components"
+    },
+    "Next-DevTools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"],
+      "description": "Next.js DevTools integration - fetch routes, logs, and metadata from running dev server"
+    },
+    "GitHub": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "description": "GitHub API access - search code, fetch issues, PRs, and repository information"
+    },
+    "Filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "ALLOWED_DIRECTORIES": "."
+      },
+      "description": "Filesystem access - read and write files within allowed directories"
+    }
+  }
+}

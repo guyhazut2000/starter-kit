@@ -13,27 +13,32 @@ This is a modern Next.js application built with TypeScript, following feature-ba
 ## Tech Stack
 
 ### Core Framework
+
 - **Next.js 16+** with App Router
 - **React 19+** for UI components
 - **TypeScript 5+** for type safety
 
 ### Data & State Management
+
 - **Prisma ORM** for database operations
 - **TanStack Query (React Query)** for server state management
 - **Zod** for runtime validation and type inference
 
 ### Styling & UI
+
 - **Tailwind CSS 4+** for utility-first styling
 - **Shadcn UI** for accessible component primitives
 - **CSS Modules** for component-scoped styles (when needed)
 
 ### Development & Quality
+
 - **ESLint** for code linting
 - **Prettier** for code formatting (if configured)
 - **Winston** for structured logging
 - **Jest** + **React Testing Library** for testing
 
 ### Additional Tools
+
 - **TanStack Table** for data tables
 - **TanStack Router** (if used for advanced routing)
 - Other popular tools as needed
@@ -70,54 +75,70 @@ This is a modern Next.js application built with TypeScript, following feature-ba
 ## Key Architectural Decisions
 
 ### 1. Feature-Based Organization
+
 - All feature code is colocated in `features/[feature]/` folders
 - Each feature is self-contained with its own actions, components, hooks, schemas, and types
 - Promotes modularity, maintainability, and easier refactoring
 
+### 1a. No Barrel index.ts
+
+- **Do not use `index.ts` (or `index.tsx`) for re-exports.** Export directly from the source file.
+- Consumers import from the **actual file path** (e.g. `@/features/auth/lib/auth-server`, `@/lib/routes`).
+- This keeps imports explicit, improves tree-shaking, and avoids circular dependency issues.
+
 ### 2. Server-First Approach
+
 - Prefer Server Components by default
 - Use Server Actions for mutations (not API routes)
 - API Routes only for public endpoints consumed by external services
 - Minimize client-side JavaScript bundle size
 
 ### 3. Type Safety
+
 - TypeScript for compile-time type checking
 - Zod for runtime validation and type inference
 - Shared types derived from Zod schemas using `z.infer<>`
 
 ### 4. Validation Strategy
+
 - Zod schemas colocated with features in `_schemas/` folders
 - Validate both client-side and server-side
 - Use `.safeParse()` for error handling (never `.parse()` in production)
 
 ### 5. Database Management
+
 - Prisma ORM for type-safe database access
 - Always use migrations for schema changes (never edit database directly)
 - Single Prisma Client instance via `lib/prisma.ts`
 
 ### 6. State Management
+
 - TanStack Query for server state (caching, synchronization, background updates)
 - React Context for global client state (when needed)
 - Local component state for UI-only state
 
 ### 7. Styling Approach
+
 - Tailwind CSS for utility-first styling
 - Shadcn UI for accessible, customizable components
 - Consistent design system through Tailwind configuration
 
 ### 8. Error Handling
+
 - Error boundaries at route level (`error.tsx`)
 - Proper error handling in Server Actions
 - User-friendly error messages (don't expose technical details)
 - Structured logging with Winston
 
 ### 9. Testing Strategy
+
 - Unit tests for utilities and business logic
 - Component tests for UI components
 - Integration tests for feature workflows
 - E2E tests for critical user journeys (if applicable)
 
 ### 10. Code Quality
+
 - ESLint for code quality checks
 - TypeScript strict mode enabled
 - Consistent code formatting
@@ -126,6 +147,7 @@ This is a modern Next.js application built with TypeScript, following feature-ba
 ## Build and Run Commands
 
 ### Development
+
 ```bash
 # Start development server
 npm run dev
@@ -144,6 +166,7 @@ npm run format
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 npm test
@@ -159,6 +182,7 @@ npm test -- path/to/test.file.tsx
 ```
 
 ### Building
+
 ```bash
 # Production build
 npm run build
@@ -171,6 +195,7 @@ npm run build -- --analyze
 ```
 
 ### Database
+
 ```bash
 # Generate Prisma Client
 npx prisma generate
@@ -189,6 +214,7 @@ npx prisma migrate reset
 ```
 
 ### Code Quality
+
 ```bash
 # Lint code
 npm run lint
@@ -203,6 +229,7 @@ npx tsc --noEmit
 ## Environment Variables
 
 ### Development (`.env.local`)
+
 ```env
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
@@ -215,6 +242,7 @@ API_KEY="your-api-key"
 ```
 
 ### Production
+
 - Use environment-specific secrets management
 - Never commit `.env` files to version control
 - Use `.env.example` as template
@@ -240,6 +268,20 @@ API_KEY="your-api-key"
 - **Documented**: Keep code self-documenting with clear naming
 - **Consistent**: Follow established patterns and conventions
 - **Maintainable**: Write code that's easy to understand and modify
+
+### Route-local component filenames
+
+- Components that live under route-local `_components` folders inside `app/**` (for example `app/(auth)/login/_components`) should use **kebab-case filenames** that describe their role, while the exported component remains PascalCase:
+  - File: `app/(auth)/login/_components/login-form.tsx` → `export function LoginForm() { ... }`
+  - File: `app/(auth)/signup/_components/signup-form.tsx` → `export function SignupForm() { ... }`
+- This keeps filenames aligned with the route and usage (`./_components/login-form`) while preserving standard React component naming for the exported symbols.
+
+### Route and path config (single source of truth)
+
+- **Do not hardcode route paths** for redirects or links. Use the **central route config** as the single source of truth.
+- Define all route paths in **`lib/routes.ts`** (e.g. `authRoutes.login`, `authRoutes.signup`, `authRoutes.dashboard`). Import from `@/lib/routes` in auth-server, forms, hooks, and any component that redirects or links to those routes.
+- This follows the common Next.js pattern of keeping route constants in app-wide `lib/` (or `constants/`) so they are easy to find and shared across features.
+- This avoids path typos, makes renames and refactors safe, and keeps route definitions in one place.
 
 ## References
 

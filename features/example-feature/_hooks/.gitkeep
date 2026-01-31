@@ -1,9 +1,0 @@
-# Feature Hooks
-
-Place all custom React hooks for this feature here.
-
-Example: `useAuth.ts`, `useProducts.ts`
-
-## Before Creating PR
-
-Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

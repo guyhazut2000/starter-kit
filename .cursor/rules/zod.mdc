@@ -1,0 +1,175 @@
+## alwaysApply: true
+
+## Zod + React Hook Form Guidelines
+
+These rules apply whenever you use Zod together with `react-hook-form` in this codebase.
+
+### Where Schemas Live
+
+- **Feature schemas**: Define all form validation schemas in `features/[feature]/schemas/` (one logical schema per file).
+  - **File naming**: `kebab-case` with `-schema` suffix, e.g. `login-schema.ts`, `user-profile-schema.ts`.
+  - **Exports**:
+    - `export const somethingSchema = z.object({ ... })`
+    - `export type SomethingValues = z.infer<typeof somethingSchema>`
+- **Do NOT** define Zod schemas directly inside React components or pages. Import them from the feature schema file instead.
+
+### Single Source of Truth
+
+- **One schema per concern**:
+  - Use a **single Zod schema** as the source of truth for:
+    - `react-hook-form` validation
+    - Server Actions / API routes validation
+    - TypeScript types (`z.infer`)
+- Derive specialized schemas from the base schema (e.g. `pick`, `omit`, `partial`) instead of duplicating shapes.
+- If both client and server validate, **reuse the exact same schema** from the feature `schemas` folder.
+
+### Integrating Zod with React Hook Form
+
+- Always use the official resolver:
+
+```ts
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginValues } from "@/features/auth/schemas/login-schema";
+
+const defaultLoginValues: LoginValues = {
+  email: "",
+  password: "",
+};
+
+export function LoginForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: defaultLoginValues,
+    mode: "onSubmit",
+  });
+
+  const onSubmit = (values: LoginValues) => {
+    // values are already type-safe & validated here
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* fields */}
+    </form>
+  );
+}
+```
+
+- **Rules**:
+  - Always pass a **typed generic** to `useForm<SchemaValues>()` using `z.infer` from the schema.
+  - Always pass `zodResolver(schema)` as `resolver` instead of writing custom validators.
+  - Use `defaultValues` that match the schema shape (including optional fields).
+
+### Error Handling & Display
+
+- Use `formState.errors` from `react-hook-form` as the **only source** of field error messages in the UI.
+- Surface Zod messages directly to the user when they are user‑friendly; otherwise, map to friendlier text at the component level.
+- Example pattern:
+
+```tsx
+<input {...register("email")} />;
+{
+  errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>;
+}
+```
+
+- For server-side validation (Server Actions / API routes), return **field-level errors** in a serializable structure and merge them into `react-hook-form` via `setError` when needed.
+
+### Schema Design Rules
+
+- Prefer **narrow, explicit schemas**:
+  - Use `.min`, `.max`, `.email`, `.url`, `.regex`, etc. with clear error messages.
+  - Use `.refine` for cross-field validation (e.g., password confirmation).
+- Keep messages **short and user-facing**; avoid technical language.
+- For booleans coming from checkboxes, explicitly coerce:
+
+```ts
+const schema = z.object({
+  termsAccepted: z.coerce.boolean().refine((val) => val, {
+    message: "You must accept the terms",
+  }),
+});
+```
+
+- For numbers coming from inputs, always use `z.coerce.number()` with `min`/`max` instead of `z.number()` directly.
+
+### Server Actions and React Hook Form
+
+- When a React Hook Form submits to a **Server Action**:
+  - Use the **same schema** on the server:
+
+```ts
+// features/auth/actions/login-action.ts
+"use server";
+
+import { loginSchema } from "@/features/auth/schemas/login-schema";
+
+export async function login(prevState: unknown, formData: FormData) {
+  const raw = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+
+  const result = loginSchema.safeParse(raw);
+
+  if (!result.success) {
+    const { fieldErrors } = result.error.flatten();
+    return {
+      success: false,
+      fieldErrors,
+      message: "Please fix the highlighted fields.",
+    };
+  }
+
+  const values = result.data;
+  // ... business logic
+
+  return { success: true };
+}
+```
+
+- In the client component, map server `fieldErrors` back into `react-hook-form` via `setError` if you are not using the built‑in `useFormState` pattern.
+
+### TypeScript & Inference
+
+- Never manually duplicate the form value type; always derive from the schema:
+
+```ts
+export const profileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  bio: z.string().max(160).optional(),
+});
+
+export type ProfileValues = z.infer<typeof profileSchema>;
+```
+
+- Use `ProfileValues` everywhere you deal with that form’s data (components, actions, tests) to keep the types in sync.
+
+### Reuse & Composition
+
+- Extract reusable pieces (e.g., `emailSchema`, `passwordSchema`) into shared feature schemas when the same rules appear in multiple forms.
+- Prefer composing schemas rather than re‑typing:
+
+```ts
+const baseAuthSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const loginSchema = baseAuthSchema;
+export const registerSchema = baseAuthSchema.extend({
+  name: z.string().min(1, "Name is required"),
+});
+```
+
+### Testing
+
+- Write tests for critical schemas (especially auth, payments, profile updates):
+  - Test valid payloads (should pass).
+  - Test edge cases and invalid payloads (should fail with the expected messages).
+- When testing React Hook Form components, **do not** mock Zod; rely on real schema behavior to catch integration issues.
