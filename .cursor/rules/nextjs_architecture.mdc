@@ -100,7 +100,7 @@ export async function createUser(formData: FormData) {
 ```typescript
 // app/api/users/route.ts
 import { z } from "zod";
-import { createUserSchema } from "@/features/users/_schemas/user-schema";
+import { createUserSchema } from "@/features/users/schemas/user-schema";
 
 export async function GET(request: Request) {
   // Public API endpoint for external services
@@ -237,47 +237,47 @@ export default async function Page() {
 │   ├── loading.tsx          # Global loading UI
 │   ├── error.tsx            # Global error boundary
 │   └── not-found.tsx        # 404 page
-├── features/                # Feature-based organization
+├── features/                # Feature-based organization (outside app router)
 │   ├── auth/                # Authentication feature
-│   │   ├── _actions/        # Server Actions for auth
+│   │   ├── actions/         # Server Actions for auth
 │   │   │   └── auth-action.ts
-│   │   ├── _components/     # Auth-specific components
+│   │   ├── components/      # Auth-specific components
 │   │   │   ├── LoginForm.tsx
 │   │   │   └── SignupForm.tsx
-│   │   ├── _hooks/          # Auth-specific hooks
+│   │   ├── hooks/           # Auth-specific hooks
 │   │   │   └── useAuth.ts
-│   │   ├── _lib/            # Auth utilities
+│   │   ├── lib/             # Auth utilities
 │   │   │   └── validations.ts
-│   │   ├── _schemas/        # Zod schemas for auth
+│   │   ├── schemas/         # Zod schemas for auth
 │   │   │   └── auth-schema.ts
-│   │   └── _types/          # Auth types
+│   │   └── types/           # Auth types
 │   │       └── auth.ts
 │   ├── products/             # Products feature
-│   │   ├── _actions/
+│   │   ├── actions/
 │   │   │   └── product-action.ts
-│   │   ├── _components/
+│   │   ├── components/
 │   │   │   ├── ProductCard.tsx
 │   │   │   └── ProductList.tsx
-│   │   ├── _hooks/
+│   │   ├── hooks/
 │   │   │   └── useProducts.ts
-│   │   ├── _lib/
+│   │   ├── lib/
 │   │   │   └── product-utils.ts
-│   │   ├── _schemas/
+│   │   ├── schemas/
 │   │   │   └── product-schema.ts
-│   │   └── _types/
+│   │   └── types/
 │   │       └── product.ts
 │   └── users/                # Users feature
-│       ├── _actions/
+│       ├── actions/
 │       │   └── user-action.ts
-│       ├── _components/
+│       ├── components/
 │       │   └── UserProfile.tsx
-│       ├── _hooks/
+│       ├── hooks/
 │       │   └── useUser.ts
-│       ├── _lib/
+│       ├── lib/
 │       │   └── user-utils.ts
-│       ├── _schemas/
+│       ├── schemas/
 │       │   └── user-schema.ts
-│       └── _types/
+│       └── types/
 │           └── user.ts
 ├── components/              # Shared UI components (minimal)
 │   ├── ui/                  # Base UI components (buttons, inputs, etc.)
@@ -305,16 +305,17 @@ export default async function Page() {
 
 1. **Feature-Based Organization**: Each feature has its own folder with all related code colocated
 2. **Feature Folders**: Use `features/` directory for feature organization
-3. **Private Folders in Features**: Prefix with `_` to organize feature code:
-   - `_actions/` - Server Actions for the feature
-   - `_components/` - Components for the feature
-   - `_hooks/` - Hooks for the feature
-   - `_lib/` - Utilities for the feature
-   - `_schemas/` - Zod schemas for the feature
-   - `_types/` - TypeScript types for the feature
+3. **Feature Folders (outside `app/`)**: Use clear, non-underscored subfolders:
+   - `actions/` - Server Actions for the feature
+   - `components/` - Components for the feature
+   - `hooks/` - Hooks for the feature
+   - `lib/` - Utilities for the feature
+   - `schemas/` - Zod schemas for the feature
+   - `types/` - TypeScript types for the feature
 4. **Route Groups**: Use parentheses `(groupName)` to organize routes without affecting URLs
 5. **Minimal Shared Code**: Only truly shared code goes in global folders (`components/ui/`, `lib/`)
 6. **Colocation**: All feature-related code stays within the feature folder
+7. **No Barrel index.ts**: Do not create `index.ts`/`index.tsx` files that re-export from other files. Export from the source file itself; consumers import from the actual path (e.g. `@/features/auth/_lib/auth-server`).
 
 ## 5. Component Organization
 
@@ -331,12 +332,12 @@ export default async function Page() {
 - Global layout components (Header, Footer, Sidebar)
 - Site-wide navigation and structure
 
-**Feature Components** (`features/[feature]/_components/`):
+**Feature Components** (`features/[feature]/components/`):
 
 - All components specific to a feature
 - Colocated with the feature's actions, hooks, types, etc.
 - Can be used within the feature's routes or shared with other features via imports
-- Example: `features/products/_components/ProductCard.tsx`
+- Example: `features/products/components/ProductCard.tsx`
 
 **Route-Specific Components** (`app/route/_components/`):
 
@@ -388,7 +389,7 @@ export default async function ProductsPage() {
 // ✅ GOOD: Feature-based structure
 // app/products/page.tsx
 import { ProductList } from "./_components/ProductList";
-import { fetchProducts } from "@/features/products/_lib/product-service";
+import { fetchProducts } from "@/features/products/lib/product-service";
 
 export default async function ProductsPage() {
   const products = await fetchProducts();
@@ -402,8 +403,8 @@ export default async function ProductsPage() {
 }
 
 // app/products/_components/ProductList.tsx
-import { ProductCard } from "@/features/products/_components/ProductCard";
-import type { Product } from "@/features/products/_types/product";
+import { ProductCard } from "@/features/products/components/ProductCard";
+import type { Product } from "@/features/products/types/product";
 
 interface ProductListProps {
   products: Product[];
@@ -419,12 +420,12 @@ export function ProductList({ products }: ProductListProps) {
   );
 }
 
-// features/products/_components/ProductCard.tsx
+// features/products/components/ProductCard.tsx
 ("use client");
 
 import { useState } from "react";
-import { addToCart } from "@/features/products/_actions/cart-actions";
-import type { Product } from "@/features/products/_types/product";
+import { addToCart } from "@/features/products/actions/cart-actions";
+import type { Product } from "@/features/products/types/product";
 
 interface ProductCardProps {
   product: Product;
@@ -667,10 +668,10 @@ export function useProducts() {
 
 ### Type Definitions
 
-**Feature Types** (`features/[feature]/_types/`):
+**Feature Types** (`features/[feature]/types/`):
 
 ```typescript
-// features/products/_types/product.ts
+// features/products/types/product.ts
 export interface Product {
   id: string;
   name: string;
@@ -685,8 +686,8 @@ export type ProductStatus = "active" | "inactive" | "draft";
 **Component Props:**
 
 ```typescript
-// features/products/_components/ProductCard.tsx
-import type { Product } from "@/features/products/_types/product";
+// features/products/components/ProductCard.tsx
+import type { Product } from "@/features/products/types/product";
 
 // Always type component props
 interface ProductCardProps {
@@ -702,14 +703,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 ### Type Safety with Server Actions
 
 ```typescript
-// features/users/_actions/user-action.ts
+// features/users/actions/user-action.ts
 "use server";
 
 export async function createUser(
   formData: FormData
-): Promise<
-  { success: true; userId: string } | { success: false; error: string }
-> {
+): Promise<{ success: true; userId: string } | { success: false; error: string }> {
   // Type-safe return
 }
 ```
@@ -720,10 +719,10 @@ export async function createUser(
 
 - **Components**: PascalCase (`Button.tsx`, `ProductCard.tsx`)
 - **Utilities**: camelCase (`formatDate.ts`, `parseFormData.ts`)
-- **Zod Schemas**: kebab-case (`user-schema.ts`, `product-schema.ts`) - in `features/[feature]/_schemas/`
-- **Server Actions**: kebab-case (`user-actions.ts`, `product-actions.ts`) - in `features/[feature]/_actions/`
-- **Hooks**: camelCase with `use` prefix (`useAuth.ts`, `useProducts.ts`) - in `features/[feature]/_hooks/`
-- **Types**: kebab-case or camelCase (`user.ts`, `product-types.ts`) - in `features/[feature]/_types/`
+- **Zod Schemas**: kebab-case (`user-schema.ts`, `product-schema.ts`) - in `features/[feature]/schemas/`
+- **Server Actions**: kebab-case (`user-action.ts`, `product-action.ts`) - in `features/[feature]/actions/`
+- **Hooks**: camelCase with `use` prefix (`useAuth.ts`, `useProducts.ts`) - in `features/[feature]/hooks/`
+- **Types**: kebab-case or camelCase (`user.ts`, `product-types.ts`) - in `features/[feature]/types/`
 - **Routes**: lowercase with hyphens (`user-profile`, `product-details`)
 
 ### Special Next.js Files
@@ -754,8 +753,8 @@ import { formatDate } from "@/lib/utils";
 
 // 4. Feature imports
 import { Button } from "@/components/ui/Button";
-import { UserCard } from "@/features/users/_components/UserCard";
-import type { User } from "@/features/users/_types/user";
+import { UserCard } from "@/features/users/components/UserCard";
+import type { User } from "@/features/users/types/user";
 
 // 5. Relative imports
 import { UserActions } from "./_components/UserActions";
@@ -899,10 +898,10 @@ export async function updateProduct(id: string, data: FormData) {
 
 ### Zod Schema Organization
 
-**Create schemas in `features/[feature]/_schemas/`:**
+**Create schemas in `features/[feature]/schemas/`:**
 
 ```typescript
-// features/users/_schemas/user-schema.ts
+// features/users/schemas/user-schema.ts
 import { z } from "zod";
 
 export const userSchema = z.object({
@@ -925,11 +924,11 @@ export const updateUserSchema = userSchema.partial().required({ id: true });
 **Always validate with Zod in Server Actions:**
 
 ```typescript
-// features/users/_actions/user-action.ts
+// features/users/actions/user-action.ts
 "use server";
 
 import { z } from "zod";
-import { createUserSchema } from "@/features/users/_schemas/user-schema";
+import { createUserSchema } from "@/features/users/schemas/user-schema";
 
 export async function createUser(formData: FormData) {
   // Extract form data
@@ -945,9 +944,7 @@ export async function createUser(formData: FormData) {
   if (!result.success) {
     return {
       success: false,
-      error: result.error.errors
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", "),
+      error: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
       fieldErrors: result.error.flatten().fieldErrors,
     };
   }
@@ -972,8 +969,8 @@ export async function createUser(formData: FormData) {
 
 import { useFormState, useFormStatus } from "react-dom";
 import { z } from "zod";
-import { contactSchema } from "@/features/contact/_schemas/contact-schema";
-import { submitContact } from "@/features/contact/_actions/contact-actions";
+import { contactSchema } from "@/features/contact/schemas/contact-schema";
+import { submitContact } from "@/features/contact/actions/contact-actions";
 
 export function ContactForm() {
   const [state, formAction] = useFormState(submitContact, null);
@@ -1066,7 +1063,7 @@ export async function POST(request: Request) {
 
 **DO:**
 
-- ✅ Create schemas in `features/[feature]/_schemas/` (colocated with feature)
+- ✅ Create schemas in `features/[feature]/schemas/` (colocated with feature)
 - ✅ Use `z.infer<>` to derive TypeScript types from schemas
 - ✅ Compose schemas using `.pick()`, `.omit()`, `.partial()`, `.extend()`
 - ✅ Provide clear error messages in schema definitions
@@ -1155,7 +1152,7 @@ const userSchema = z
 **Generate Zod schemas from Prisma models (optional):**
 
 ```typescript
-// features/users/_schemas/user-schema.ts
+// features/users/schemas/user-schema.ts
 import { z } from "zod";
 import { User } from "@prisma/client";
 
@@ -1410,10 +1407,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
@@ -1750,7 +1744,7 @@ export async function submitContact(prevState: any, formData: FormData) {
 // app/products/page.tsx
 import { Suspense } from "react";
 import { ProductList } from "./_components/ProductList";
-import { ProductListSkeleton } from "@/features/products/_components/ProductListSkeleton";
+import { ProductListSkeleton } from "@/features/products/components/ProductListSkeleton";
 
 export default function ProductsPage() {
   return (
@@ -1764,8 +1758,8 @@ export default function ProductsPage() {
 }
 
 // app/products/_components/ProductList.tsx
-import { fetchProducts } from "@/features/products/_lib/product-service";
-import { ProductCard } from "@/features/products/_components/ProductCard";
+import { fetchProducts } from "@/features/products/lib/product-service";
+import { ProductCard } from "@/features/products/components/ProductCard";
 
 export async function ProductList() {
   const products = await fetchProducts();
@@ -1790,7 +1784,7 @@ export async function ProductList() {
 
 - [ ] Is this a Server or Client Component?
 - [ ] Can this be a Server Component? (prefer Server Components)
-- [ ] Is this component feature-specific? (place in `features/[feature]/_components/`)
+- [ ] Is this component feature-specific? (place in `features/[feature]/components/`)
 - [ ] Is this a shared UI component? (place in `components/ui/`)
 - [ ] Are props properly typed?
 - [ ] Is error handling implemented?
@@ -1804,7 +1798,7 @@ export async function ProductList() {
 - [ ] Is data fetching optimized?
 - [ ] Are components properly separated?
 - [ ] Is caching strategy appropriate?
-- [ ] Is Zod schema defined in the feature's `_schemas/` folder?
+- [ ] Is Zod schema defined in the feature's `schemas/` folder?
 
 ### Before Database Changes
 

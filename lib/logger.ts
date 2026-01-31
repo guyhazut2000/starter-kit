@@ -1,6 +1,6 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { env } from "@/env";
+import { env } from "@/lib/env";
 
 /**
  * Winston logger configuration

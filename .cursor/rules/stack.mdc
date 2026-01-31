@@ -9,82 +9,92 @@ alwaysApply: true
 ## Framework Versions
 
 ### Core
+
 - **Next.js**: 16.1.2+ (App Router)
 - **React**: 19.2.3+
 - **React DOM**: 19.2.3+
 - **TypeScript**: 5.0+
 
 ### Styling
+
 - **Tailwind CSS**: 4.0+
 - **PostCSS**: Latest (via @tailwindcss/postcss)
 
 ### Development
+
 - **Node.js**: 20+ (LTS recommended)
 - **npm**: Latest (or use package manager of choice)
 
 ## Key Dependencies and Purposes
 
 ### Core Framework
+
 ```json
 {
-  "next": "^16.1.2",           // React framework with App Router
-  "react": "^19.2.3",         // UI library
-  "react-dom": "^19.2.3"      // React DOM renderer
+  "next": "^16.1.2", // React framework with App Router
+  "react": "^19.2.3", // UI library
+  "react-dom": "^19.2.3" // React DOM renderer
 }
 ```
 
 ### Data & Validation
+
 ```json
 {
   "@prisma/client": "^5.0.0", // Prisma ORM client
-  "prisma": "^5.0.0",          // Prisma CLI and tools
-  "zod": "^3.22.0"             // Runtime validation and type inference
+  "prisma": "^5.0.0", // Prisma CLI and tools
+  "zod": "^3.22.0" // Runtime validation and type inference
 }
 ```
 
 ### State Management
+
 ```json
 {
-  "@tanstack/react-query": "^5.0.0"  // Server state management, caching, synchronization
+  "@tanstack/react-query": "^5.0.0" // Server state management, caching, synchronization
 }
 ```
 
 ### UI & Styling
+
 ```json
 {
-  "tailwindcss": "^4.0.0",           // Utility-first CSS framework
-  "@tailwindcss/postcss": "^4.0.0",  // PostCSS plugin for Tailwind
-  "@radix-ui/react-*": "latest"      // Headless UI primitives (via Shadcn)
+  "tailwindcss": "^4.0.0", // Utility-first CSS framework
+  "@tailwindcss/postcss": "^4.0.0", // PostCSS plugin for Tailwind
+  "@radix-ui/react-*": "latest" // Headless UI primitives (via Shadcn)
 }
 ```
 
 ### Logging
+
 ```json
 {
-  "winston": "^3.11.0",              // Structured logging
-  "winston-daily-rotate-file": "^4.7.0"  // Log rotation (optional)
+  "winston": "^3.11.0", // Structured logging
+  "winston-daily-rotate-file": "^4.7.0" // Log rotation (optional)
 }
 ```
 
 ### Testing
+
 ```json
 {
-  "@testing-library/react": "^14.0.0",  // Component testing
+  "@testing-library/react": "^14.0.0", // Component testing
   "@testing-library/jest-dom": "^6.0.0", // DOM matchers
   "@testing-library/user-event": "^14.0.0", // User interaction simulation
-  "jest": "^29.0.0",                    // Test runner
-  "jest-environment-jsdom": "^29.0.0"   // DOM environment for Jest
+  "jest": "^29.0.0", // Test runner
+  "jest-environment-jsdom": "^29.0.0" // DOM environment for Jest
 }
 ```
 
 ### Development Tools
+
 ```json
 {
-  "eslint": "^9.0.0",                  // Linting
-  "eslint-config-next": "^16.1.2",     // Next.js ESLint config
-  "@types/node": "^20.0.0",            // Node.js type definitions
-  "@types/react": "^19.0.0",           // React type definitions
-  "@types/react-dom": "^19.0.0"        // React DOM type definitions
+  "eslint": "^9.0.0", // Linting
+  "eslint-config-next": "^16.1.2", // Next.js ESLint config
+  "@types/node": "^20.0.0", // Node.js type definitions
+  "@types/react": "^19.0.0", // React type definitions
+  "@types/react-dom": "^19.0.0" // React DOM type definitions
 }
 ```
 
@@ -93,29 +103,30 @@ alwaysApply: true
 ### Next.js Configuration
 
 **`next.config.ts`:**
+
 ```typescript
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // React strict mode
   reactStrictMode: true,
-  
+
   // Image optimization
   images: {
     domains: ["example.com"], // Add image domains
     formats: ["image/avif", "image/webp"],
   },
-  
+
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // Experimental features (if needed)
   experimental: {
     // Only enable when needed
   },
-  
+
   // TypeScript and ESLint
   typescript: {
     // Fail build on type errors in production
@@ -133,6 +144,7 @@ export default nextConfig;
 ### TypeScript Configuration
 
 **`tsconfig.json`:**
+
 ```json
 {
   "compilerOptions": {
@@ -169,6 +181,7 @@ export default nextConfig;
 ### Tailwind Configuration
 
 **`tailwind.config.ts`:**
+
 ```typescript
 import type { Config } from "tailwindcss";
 
@@ -199,6 +212,7 @@ export default config;
 ### Prisma Configuration
 
 **`prisma/schema.prisma`:**
+
 ```prisma
 generator client {
   provider = "prisma-client-js"
@@ -215,6 +229,7 @@ datasource db {
 ### ESLint Configuration
 
 **`eslint.config.mjs`:**
+
 ```javascript
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -244,6 +259,7 @@ export default eslintConfig;
 ### Winston Logging Configuration
 
 **`lib/logger.ts`:**
+
 ```typescript
 import winston from "winston";
 
@@ -264,10 +280,7 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV !== "production") {
   logger.add(
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
     })
   );
 }
@@ -280,46 +293,48 @@ export default logger;
 ### Server Actions (Preferred)
 
 **Pattern:**
+
 ```typescript
-// features/[feature]/_actions/[feature]-actions.ts
+// features/[feature]/actions/[feature]-actions.ts
 "use server";
 
 import { z } from "zod";
-import { schema } from "@/features/[feature]/_schemas/[feature]-schema";
+import { schema } from "@/features/[feature]/schemas/[feature]-schema";
 import { revalidatePath } from "next/cache";
 
 export async function createItem(formData: FormData) {
   // 1. Extract and validate
   const rawData = Object.fromEntries(formData.entries());
   const result = schema.safeParse(rawData);
-  
+
   if (!result.success) {
     return {
       success: false,
-      error: result.error.errors.map(e => e.message).join(", "),
+      error: result.error.errors.map((e) => e.message).join(", "),
       fieldErrors: result.error.flatten().fieldErrors,
     };
   }
-  
+
   // 2. Business logic
   // ...
-  
+
   // 3. Revalidate cache
   revalidatePath("/items");
-  
+
   // 4. Return result
   return { success: true, data: item };
 }
 ```
 
 **Response Format:**
+
 ```typescript
 // Success
 { success: true, data: T }
 
 // Error
-{ 
-  success: false, 
+{
+  success: false,
   error: string,
   fieldErrors?: Record<string, string[]>
 }
@@ -328,33 +343,31 @@ export async function createItem(formData: FormData) {
 ### API Routes (Public Endpoints Only)
 
 **Pattern:**
+
 ```typescript
 // app/api/[resource]/route.ts
 import { z } from "zod";
-import { schema } from "@/features/[feature]/_schemas/[feature]-schema";
+import { schema } from "@/features/[feature]/schemas/[feature]-schema";
 
 export async function GET(request: Request) {
   try {
     // Query parameters
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") || "1";
-    
+
     // Fetch data
     // ...
-    
+
     return Response.json({ data: items, page: Number(page) });
   } catch (error) {
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Validate
     const result = schema.safeParse(body);
     if (!result.success) {
@@ -363,21 +376,19 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    
+
     // Process
     // ...
-    
+
     return Response.json({ success: true, data: item }, { status: 201 });
   } catch (error) {
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 ```
 
 **HTTP Status Codes:**
+
 - `200` - Success (GET, PUT, PATCH)
 - `201` - Created (POST)
 - `204` - No Content (DELETE)
@@ -390,11 +401,13 @@ export async function POST(request: Request) {
 ### Authentication Approach
 
 **Session-Based (Recommended for Next.js):**
+
 - Use NextAuth.js or similar
 - Server-side session management
 - Secure HTTP-only cookies
 
 **Token-Based (If needed):**
+
 - JWT tokens for API authentication
 - Store in secure HTTP-only cookies
 - Refresh token pattern for long-lived sessions
@@ -402,6 +415,7 @@ export async function POST(request: Request) {
 ### TanStack Query Configuration
 
 **Setup:**
+
 ```typescript
 // app/providers.tsx
 "use client";
@@ -434,12 +448,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
 ```
 
 **Usage Pattern:**
+
 ```typescript
-// features/products/_hooks/useProducts.ts
+// features/products/hooks/useProducts.ts
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { Product } from "@/features/products/_types/product";
+import type { Product } from "@/features/products/types/product";
 
 async function fetchProducts(): Promise<Product[]> {
   const res = await fetch("/api/products");
@@ -458,6 +473,7 @@ export function useProducts() {
 ## Environment Variables
 
 ### Required Variables
+
 ```env
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
@@ -467,6 +483,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
 ### Optional Variables
+
 ```env
 # API Keys
 API_KEY="your-api-key"
@@ -479,6 +496,7 @@ ENABLE_FEATURE_X="true"
 ```
 
 ### Naming Convention
+
 - `NEXT_PUBLIC_*` for client-accessible variables
 - UPPER_SNAKE_CASE for all variables
 - Group related variables with comments
@@ -486,12 +504,14 @@ ENABLE_FEATURE_X="true"
 ## Best Practices
 
 ### Dependency Management
+
 - Keep dependencies up to date
 - Use exact versions for critical dependencies (if needed)
 - Review and audit dependencies regularly
 - Use `npm audit` to check for vulnerabilities
 
 ### Performance
+
 - Use Server Components by default
 - Implement proper caching strategies
 - Optimize images with `next/image`
@@ -499,6 +519,7 @@ ENABLE_FEATURE_X="true"
 - Monitor bundle size
 
 ### Security
+
 - Never commit secrets to version control
 - Use environment variables for sensitive data
 - Validate all inputs with Zod
@@ -507,6 +528,7 @@ ENABLE_FEATURE_X="true"
 - Implement rate limiting for APIs
 
 ### Type Safety
+
 - Enable TypeScript strict mode
 - Use Zod for runtime validation
 - Derive types from Zod schemas

@@ -1,9 +1,0 @@
-# TypeScript Types
-
-Place all TypeScript types and interfaces for this feature here.
-
-Example: `user.ts`, `product.ts`
-
-## Before Creating PR
-
-Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

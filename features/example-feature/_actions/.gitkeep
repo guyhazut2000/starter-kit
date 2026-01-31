@@ -1,9 +1,0 @@
-# Server Actions
-
-Place all Server Actions for this feature here.
-
-Example: `user-actions.ts`, `product-actions.ts`
-
-## Before Creating PR
-
-Review your feature implementation using `FEATURE_REVIEW_CHECKLIST.md` in the parent directory.

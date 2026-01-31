@@ -17,12 +17,14 @@ alwaysApply: true
 ## Testing Stack
 
 ### Core Tools
+
 - **Jest**: Test runner and assertion library
 - **React Testing Library**: Component testing utilities
 - **@testing-library/user-event**: User interaction simulation
 - **@testing-library/jest-dom**: Additional DOM matchers
 
 ### Optional Tools
+
 - **MSW (Mock Service Worker)**: API mocking for integration tests
 - **Playwright** or **Cypress**: E2E testing (if needed)
 - **@tanstack/react-query** testing utilities
@@ -32,24 +34,26 @@ alwaysApply: true
 ### Colocated Tests (Recommended)
 
 **Structure:**
+
 ```
 features/
   products/
-    _components/
+    components/
       ProductCard.tsx
       ProductCard.test.tsx        # Colocated test
-    _actions/
+    actions/
       product-actions.ts
       product-actions.test.ts     # Colocated test
-    _hooks/
+    hooks/
       useProducts.ts
       useProducts.test.ts         # Colocated test
-    _lib/
+    lib/
       product-utils.ts
       product-utils.test.ts       # Colocated test
 ```
 
 **Benefits:**
+
 - Easy to find tests
 - Tests stay with code
 - Easy to delete when removing features
@@ -57,15 +61,17 @@ features/
 ### Separate Test Directory (Alternative)
 
 **Structure:**
+
 ```
 __tests__/
   features/
     products/
-      _components/
+      components/
         ProductCard.test.tsx
 ```
 
 **Use when:**
+
 - Test files are very large
 - Team prefers separate test directory
 - Tests need special organization
@@ -75,12 +81,14 @@ __tests__/
 ### ✅ DO Test
 
 **Server Components:**
+
 - Data fetching and rendering
 - Error handling and error boundaries
 - Loading states
 - Server-side logic and transformations
 
 **Client Components:**
+
 - User interactions (clicks, form submissions, input changes)
 - State management and updates
 - Event handlers
@@ -88,6 +96,7 @@ __tests__/
 - Accessibility (if applicable)
 
 **Server Actions:**
+
 - Input validation (Zod schema validation)
 - Success cases
 - Error handling
@@ -95,18 +104,21 @@ __tests__/
 - Database operations (mocked)
 
 **Hooks:**
+
 - State updates
 - Side effects
 - Return values
 - Error handling
 
 **Utilities:**
+
 - All utility functions
 - Edge cases and boundary conditions
 - Error handling
 - Type transformations
 
 **Forms:**
+
 - Form submission
 - Validation (client and server)
 - Error display
@@ -114,6 +126,7 @@ __tests__/
 - Field interactions
 
 **API Routes:**
+
 - Request validation
 - Response formats
 - Status codes
@@ -133,12 +146,12 @@ __tests__/
 ### Server Component Test
 
 ```typescript
-// features/products/_components/ProductList.test.tsx
+// features/products/components/ProductList.test.tsx
 import { render } from "@testing-library/react";
 import ProductList from "./ProductList";
-import { fetchProducts } from "@/features/products/_lib/product-service";
+import { fetchProducts } from "@/features/products/lib/product-service";
 
-jest.mock("@/features/products/_lib/product-service");
+jest.mock("@/features/products/lib/product-service");
 
 describe("ProductList", () => {
   it("renders products correctly", async () => {
@@ -146,28 +159,28 @@ describe("ProductList", () => {
       { id: "1", name: "Product 1", price: 100 },
       { id: "2", name: "Product 2", price: 200 },
     ];
-    
+
     (fetchProducts as jest.Mock).mockResolvedValue(mockProducts);
-    
+
     const { getByText } = await render(<ProductList />);
-    
+
     expect(getByText("Product 1")).toBeInTheDocument();
     expect(getByText("Product 2")).toBeInTheDocument();
   });
-  
+
   it("handles empty state", async () => {
     (fetchProducts as jest.Mock).mockResolvedValue([]);
-    
+
     const { getByText } = await render(<ProductList />);
-    
+
     expect(getByText("No products found")).toBeInTheDocument();
   });
-  
+
   it("handles errors gracefully", async () => {
     (fetchProducts as jest.Mock).mockRejectedValue(new Error("Failed"));
-    
+
     const { getByText } = await render(<ProductList />);
-    
+
     expect(getByText(/error/i)).toBeInTheDocument();
   });
 });
@@ -176,13 +189,13 @@ describe("ProductList", () => {
 ### Client Component Test
 
 ```typescript
-// features/products/_components/ProductCard.test.tsx
+// features/products/components/ProductCard.test.tsx
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ProductCard } from "./ProductCard";
-import { addToCart } from "@/features/products/_actions/cart-actions";
+import { addToCart } from "@/features/products/actions/cart-actions";
 
-jest.mock("@/features/products/_actions/cart-actions");
+jest.mock("@/features/products/actions/cart-actions");
 
 describe("ProductCard", () => {
   const mockProduct = {
@@ -191,38 +204,38 @@ describe("ProductCard", () => {
     price: 100,
     description: "Test description",
   };
-  
+
   it("renders product information", () => {
     render(<ProductCard product={mockProduct} />);
-    
+
     expect(screen.getByText("Test Product")).toBeInTheDocument();
     expect(screen.getByText("Test description")).toBeInTheDocument();
     expect(screen.getByText("$100")).toBeInTheDocument();
   });
-  
+
   it("calls addToCart when button is clicked", async () => {
     const user = userEvent.setup();
     (addToCart as jest.Mock).mockResolvedValue({ success: true });
-    
+
     render(<ProductCard product={mockProduct} />);
-    
+
     const button = screen.getByRole("button", { name: /add to cart/i });
     await user.click(button);
-    
+
     expect(addToCart).toHaveBeenCalledWith("1");
   });
-  
+
   it("shows loading state during add to cart", async () => {
     const user = userEvent.setup();
     (addToCart as jest.Mock).mockImplementation(
       () => new Promise(resolve => setTimeout(resolve, 100))
     );
-    
+
     render(<ProductCard product={mockProduct} />);
-    
+
     const button = screen.getByRole("button", { name: /add to cart/i });
     await user.click(button);
-    
+
     expect(button).toBeDisabled();
     expect(screen.getByText(/adding/i)).toBeInTheDocument();
   });
@@ -232,7 +245,7 @@ describe("ProductCard", () => {
 ### Server Action Test
 
 ```typescript
-// features/users/_actions/user-actions.test.ts
+// features/users/actions/user-actions.test.ts
 import { createUser } from "./user-actions";
 import { prisma } from "@/lib/prisma";
 
@@ -249,15 +262,15 @@ describe("createUser", () => {
     const formData = new FormData();
     formData.append("name", "John Doe");
     formData.append("email", "john@example.com");
-    
+
     (prisma.user.create as jest.Mock).mockResolvedValue({
       id: "1",
       name: "John Doe",
       email: "john@example.com",
     });
-    
+
     const result = await createUser(formData);
-    
+
     expect(result.success).toBe(true);
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
@@ -266,29 +279,27 @@ describe("createUser", () => {
       },
     });
   });
-  
+
   it("returns error for invalid data", async () => {
     const formData = new FormData();
     // Missing required fields
-    
+
     const result = await createUser(formData);
-    
+
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
-  
+
   it("handles database errors", async () => {
     const formData = new FormData();
     formData.append("name", "John Doe");
     formData.append("email", "john@example.com");
-    
-    (prisma.user.create as jest.Mock).mockRejectedValue(
-      new Error("Database error")
-    );
-    
+
+    (prisma.user.create as jest.Mock).mockRejectedValue(new Error("Database error"));
+
     const result = await createUser(formData);
-    
+
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
   });
@@ -298,7 +309,7 @@ describe("createUser", () => {
 ### Hook Test
 
 ```typescript
-// features/products/_hooks/useProducts.test.ts
+// features/products/hooks/useProducts.test.ts
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useProducts } from "./useProducts";
@@ -312,7 +323,7 @@ function createWrapper() {
       queries: { retry: false },
     },
   });
-  
+
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       {children}
@@ -324,39 +335,39 @@ describe("useProducts", () => {
   beforeEach(() => {
     (fetch as jest.Mock).mockClear();
   });
-  
+
   it("fetches products successfully", async () => {
     const mockProducts = [{ id: "1", name: "Product 1" }];
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => mockProducts,
     });
-    
+
     const { result } = renderHook(() => useProducts(), {
       wrapper: createWrapper(),
     });
-    
+
     expect(result.current.isLoading).toBe(true);
-    
+
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
-    
+
     expect(result.current.data).toEqual(mockProducts);
     expect(result.current.error).toBeNull();
   });
-  
+
   it("handles fetch errors", async () => {
     (fetch as jest.Mock).mockRejectedValueOnce(new Error("Fetch failed"));
-    
+
     const { result } = renderHook(() => useProducts(), {
       wrapper: createWrapper(),
     });
-    
+
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
-    
+
     expect(result.current.data).toBeUndefined();
   });
 });
@@ -365,7 +376,7 @@ describe("useProducts", () => {
 ### Utility Test
 
 ```typescript
-// features/products/_lib/product-utils.test.ts
+// features/products/lib/product-utils.test.ts
 import { formatPrice, calculateTotal } from "./product-utils";
 
 describe("formatPrice", () => {
@@ -374,7 +385,7 @@ describe("formatPrice", () => {
     expect(formatPrice(99.99)).toBe("$99.99");
     expect(formatPrice(0)).toBe("$0.00");
   });
-  
+
   it("handles negative prices", () => {
     expect(formatPrice(-10)).toBe("-$10.00");
   });
@@ -386,10 +397,10 @@ describe("calculateTotal", () => {
       { price: 10, quantity: 2 },
       { price: 5, quantity: 3 },
     ];
-    
+
     expect(calculateTotal(items)).toBe(35);
   });
-  
+
   it("handles empty array", () => {
     expect(calculateTotal([])).toBe(0);
   });
@@ -508,19 +519,19 @@ npm test -- --ci --coverage --maxWorkers=2
 ```typescript
 describe("ComponentName", () => {
   // Setup (beforeEach, mocks, etc.)
-  
+
   describe("rendering", () => {
     it("renders correctly", () => {
       // ...
     });
   });
-  
+
   describe("interactions", () => {
     it("handles click", () => {
       // ...
     });
   });
-  
+
   describe("error handling", () => {
     it("handles errors gracefully", () => {
       // ...
@@ -532,8 +543,9 @@ describe("ComponentName", () => {
 ### Test Data
 
 **Create test fixtures:**
+
 ```typescript
-// features/products/_lib/__fixtures__/products.ts
+// features/products/lib/__fixtures__/products.ts
 export const mockProduct = {
   id: "1",
   name: "Test Product",

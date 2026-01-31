@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+
+# React & Pages Rules
+
+## Page Components (`app/**/page.tsx`)
+
+- **Use composition only**: `page.tsx` files should only compose other components and call server utilities (auth, data loaders, etc.). Do **not** put raw JSX/HTML layout directly in the page function.
+- **No native HTML in pages**: Keep `div`, `main`, `section`, `button`, etc. inside dedicated components (e.g. `app/[route]/_components/*` or feature components), not directly in `page.tsx`.
+- **Colocate route components**: For each route, create a route-level component in an `_components/` folder (e.g. `app/dashboard/_components/DashboardPage.tsx`) and have the page file render that component.
+- **Server logic allowed**: It is fine for `page.tsx` to be `async`, call server helpers like `requireAuth`, and then render a composed root component.
+- **Name pages with `Page` postfix**: The default exported function in `page.tsx` should be named after the route with a `Page` suffix (e.g. `HomePage` for `app/page.tsx`, `DashboardPage` for `app/dashboard/page.tsx`).
