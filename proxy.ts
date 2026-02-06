@@ -2,7 +2,13 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
-import { authRoutes, protectedRoutes } from "@/lib/routes";
+import { authRoutes } from "@/lib/routes";
+import {
+  isApiRoute,
+  shouldRedirectToLogin,
+  shouldRedirectToDashboard,
+  buildLoginUrl,
+} from "@/lib/middleware-utils";
 
 /**
  * Next.js middleware (proxy): handles auth redirects for public, protected, and API routes.
@@ -14,33 +20,27 @@ import { authRoutes, protectedRoutes } from "@/lib/routes";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // API routes: public API routes (e.g. /api/auth) pass through; others continue without redirect
-  if (pathname.startsWith("/api/")) {
+  if (isApiRoute(pathname)) {
     return NextResponse.next();
   }
 
   const hasSession = await getHasSession(request);
 
-  // Protected routes: redirect to login when not signed in
-  const isProtected = protectedRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-  if (isProtected && !hasSession) {
-    const loginUrl = new URL(authRoutes.login, request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+  if (shouldRedirectToLogin(pathname, hasSession)) {
+    const loginUrl = buildLoginUrl(request.url, pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Public auth pages (login/signup): redirect to dashboard when signed in
-  const isAuthPage =
-    pathname === authRoutes.login || pathname === authRoutes.signup;
-  if (isAuthPage && hasSession) {
+  if (shouldRedirectToDashboard(pathname, hasSession)) {
     return NextResponse.redirect(new URL(authRoutes.dashboard, request.url));
   }
 
   return NextResponse.next();
 }
 
+/**
+ * Session check for middleware only. Kept here so middleware-utils stays pure (pathname + hasSession).
+ */
 async function getHasSession(request: NextRequest): Promise<boolean> {
   try {
     const session = await auth.api.getSession({

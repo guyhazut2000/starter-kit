@@ -16,6 +16,25 @@ const baseAuthSchema = z.object({
 export const loginSchema = baseAuthSchema;
 export type LoginValues = z.infer<typeof loginSchema>;
 
+/** Login credentials initial values. */
+export const loginInitialValues: LoginValues = {
+  email: "",
+  password: "",
+} as const;
+
+/** OTP step: 6-digit code. */
+export const loginOtpSchema = z.object({
+  otp: z
+    .string()
+    .min(6, "Enter the 6-digit code.")
+    .max(6)
+    .regex(/^\d+$/, "Code must be 6 digits."),
+});
+export type LoginOtpValues = z.infer<typeof loginOtpSchema>;
+
+/** Channel for sending OTP (email or sms). */
+export type LoginOtpChannel = "email" | "sms";
+
 // ---------------------------------------------------------------------------
 // Signup — extends base with name
 // ---------------------------------------------------------------------------
