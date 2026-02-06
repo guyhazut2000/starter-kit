@@ -26,10 +26,9 @@ function sign(payload: string, secret: string): string {
 
 function verify(payload: string, signature: string, secret: string): boolean {
   const expected = sign(payload, secret);
-  if (payload.length !== expected.length || signature.length !== expected.length) {
-    return false;
-  }
   try {
+    // `timingSafeEqual` requires buffers of the same length.
+    if (signature.length !== expected.length) return false;
     return timingSafeEqual(Buffer.from(signature, "utf8"), Buffer.from(expected, "utf8"));
   } catch {
     return false;
