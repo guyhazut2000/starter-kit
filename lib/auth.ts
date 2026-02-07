@@ -14,6 +14,9 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: [env.BETTER_AUTH_URL],
+  advanced: {
+    cookiePrefix: env.SESSION_COOKIE_PREFIX,
+  },
   plugins: [
     nextCookies(),
     emailOTP({

@@ -3,7 +3,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 
 import { env } from "@/lib/env";
 
-const COOKIE_NAME = "pending_2step";
+/** Prefixed so multiple apps on the same server do not share the pending 2-step cookie. */
+const COOKIE_NAME = `${env.SESSION_COOKIE_PREFIX}.pending_2step`;
 const MAX_AGE_SEC = 600; // 10 minutes
 
 export interface Pending2StepPayload {

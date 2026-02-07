@@ -12,6 +12,8 @@ export const env = createEnv({
     LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
     BETTER_AUTH_URL: z.string().url(),
     BETTER_AUTH_SECRET: z.string(),
+    /** Cookie prefix for session cookies (e.g. "my-app" → "my-app.session_token"). Default "session". Set per app when multiple apps share a server. */
+    SESSION_COOKIE_PREFIX: z.string().default("session"),
   },
 
   /**
@@ -34,6 +36,7 @@ export const env = createEnv({
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    SESSION_COOKIE_PREFIX: process.env.SESSION_COOKIE_PREFIX,
   },
   /**
    * Run `build` or `dev` with SKIP_ENV_VALIDATION to skip env validation. This is especially
